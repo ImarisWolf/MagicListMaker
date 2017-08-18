@@ -83,21 +83,16 @@ namespace MagicParser.CodeParsing
         #endregion
 
 
-        #region Parser
-
         //основной метод. Возвращает готовую строку с данными. Все другие методы сделаны в соответствии с BNF.
-        #region input
         //input = ([databasesDeclaration] [list] [freeText])*
         public string Parse()
         {
             Tokenizer t = new Tokenizer(input);
-            #region ([databasesDeclaration] [list] [freeText])*
             string output = "";
             int lastPos = 0;
             //пока токенайзер не просмотрит весь инпут, выполняем
             while (!t.endIsReached)
             {
-                #region [databasesDeclaration]
                 //databasesDeclaration = declarationBeginToken declaration* declarationEndToken
                 if (GetNextToken(t).ToLower() == keyWords["declarationBeginToken"].ToLower())
                 {
@@ -109,8 +104,6 @@ namespace MagicParser.CodeParsing
                     if (token.ToLower() != keyWords["declarationEndToken"].ToLower()) { errorDescription = ErrorExpected(keyWords["declarationEndToken"]); tokenizerLastErrorPos = t.pos; return output; }
                     lastPos = t.pos;
                 }
-                #endregion
-                #region [list]
                 //list = listBeginToken listParams listEndToken
                 else if (GetNextToken(t).ToLower() == keyWords["listBeginToken"].ToLower())
                 {
@@ -123,8 +116,6 @@ namespace MagicParser.CodeParsing
                     if (token.ToLower() != keyWords["listEndToken"].ToLower()) { errorDescription = ErrorExpected(keyWords["listEndToken"]); tokenizerLastErrorPos = t.pos; return output; }
                     lastPos = t.pos;
                 }
-                #endregion
-                #region [freeText]
                 //Иначе необходимо добавить весь текст (с пробелами) в аутпут
                 //freeText = ?string that doesn't include codeBeginToken?
                 else
@@ -133,14 +124,11 @@ namespace MagicParser.CodeParsing
                     output += input.Substring(lastPos, t.pos - lastPos);
                     lastPos = t.pos;
                 }
-                #endregion
             }
 
             tokenizerLastErrorPos = 0;
             return output;
-            #endregion
         }
-        #endregion
 
         //declaration*
         //declaration = name '=' "'" path "'";
@@ -628,8 +616,7 @@ namespace MagicParser.CodeParsing
             else { errorDescription = ErrorExpected(keyWords["formattingToken"]); return ""; }
         }
 
-        #endregion
-
+        
         #region Operators
 
         //value = boolValue | numberValue | stringValue

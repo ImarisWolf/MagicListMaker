@@ -66,16 +66,16 @@ value = boolValue | numberValue | stringValue;
 (* T O K E N S *)
 
 (* Preset tokens *)
-declarationBeginToken = '<dbs>';
-declarationEndToken = '</dbs>';
-listBeginToken = '<list>';
-listEndToken = '</list>';
+declarationBeginToken = 'dbs';
+declarationEndToken = 'enddbs';
+listBeginToken = 'list';
+listEndToken = 'endlist';
 databasesToken = 'dbs';
 parseCommentsToken = 'parseComments';
 filterToken = 'filter';
-groupingToken = 'grouping';
-sortingToken = 'sorting';
-formattingToken = 'formatting';
+groupingToken = 'group';
+sortingToken = 'sort';
+formattingToken = 'format';
 (* also there are:
     '=' - equality token;
     '!=' - non-equality token;

@@ -450,93 +450,100 @@ namespace MagicParser
                 else if (token.ToLower() == "nonfoil" || token.ToLower() == "non-foil") { GetToken(t); par.type = "non-foil"; }
                 else if (token.ToLower() == "foil") { GetToken(t); par.type = "foil"; }
 
-                //property = grade | price | language | dollarRate | discount | comment | priority | field;
+                //property = price | language | dollarRate | discount | comment | priority | field | grade;
+                bool continueParseGrade = false;
                 do
                 {
-                    //comment = '"' ?anyText? '"';
-                    if (token == "\"")
+                    //grade = ('M' | 'Mint' | 'NM' | 'SP' | 'MP' | 'HP') ?anyText?;
+                    if (Regex.IsMatch(token, @"^(?i)M|Mint|NM|SP|MP|HP(?-i)$"))
                     {
-                        token = t.GetUntil('"');
-                        par.comment = token;
+                        if (continueParseGrade) par.grade += token;
+                        else par.grade = token;
+                        continueParseGrade = true; //если дальше есть ещё символы, не относящиеся к другим параметрам, то это скорее всего grade
                         GetToken(t);
                     }
-                    //discount = ('d' ?number?) | (?number? '%');
-                    else if (token.ToLower() == "d")
+                    else
                     {
-                        GetToken(t);
-                        if (token == "-")
+                        continueParseGrade = false;
+                        //comment = '"' ?anyText? '"';
+                        if (token == "\"")
+                        {
+                            token = t.GetUntil('"');
+                            par.comment = token;
+                            GetToken(t);
+                        }
+                        //discount = ('d' ?number?) | (?number? '%');
+                        else if (token.ToLower() == "d")
                         {
                             GetToken(t);
-                            if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
+                            if (token == "-")
                             {
-                                float.TryParse(token.Replace('.', ','), out par.dollarRate);
-                                par.dollarRate = -par.dollarRate;
                                 GetToken(t);
+                                if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
+                                {
+                                    float.TryParse(token.Replace('.', ','), out par.dollarRate);
+                                    par.dollarRate = -par.dollarRate;
+                                    GetToken(t);
+                                }
+                                else { errorDescription = ErrorExpected(); return; }
                             }
                             else { errorDescription = ErrorExpected(); return; }
                         }
-                        else { errorDescription = ErrorExpected(); return; }
-                    }
-                    else if (Regex.IsMatch(token, @"^(?i)d\d+(\.\d+)?(?-i)$"))
-                    {
-                        float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
-                        GetToken(t);
-                    }
-                    else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
-                    {
-                        float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.dollarRate);
-                    }
-                    //dollarRate = ('c' | 'r')  ?number?;
-                    else if (Regex.IsMatch(token, @"^(?i)(c|r)\d+(\.\d+)?(?-i)$"))
-                    {
-                        float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
-                        GetToken(t);
-                    }
-                    //field = '$' ?fieldName? '=' ?anyText?;
-                    else if (token == "$")
-                    {
-                        GetToken(t);
-                        //Проверяем существование поля с таким названием
-                        FieldInfo field = typeof(Entry).GetField(token, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                        par.field = field;
-                        if (field != null)
+                        else if (Regex.IsMatch(token, @"^(?i)d\d+(\.\d+)?(?-i)$"))
+                        {
+                            float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
+                            GetToken(t);
+                        }
+                        else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
+                        {
+                            float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.dollarRate);
+                        }
+                        //dollarRate = ('c' | 'r')  ?number?;
+                        else if (Regex.IsMatch(token, @"^(?i)(c|r)\d+(\.\d+)?(?-i)$"))
+                        {
+                            float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
+                            GetToken(t);
+                        }
+                        //field = '$' ?fieldName? '=' ?anyText?;
+                        else if (token == "$")
                         {
                             GetToken(t);
-                            if (token == "=")
+                            //Проверяем существование поля с таким названием
+                            FieldInfo field = typeof(Entry).GetField(token, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                            par.field = field;
+                            if (field != null)
                             {
                                 GetToken(t);
-                                par.fieldValue = token;
-                                GetToken(t);
+                                if (token == "=")
+                                {
+                                    GetToken(t);
+                                    par.fieldValue = token;
+                                    GetToken(t);
+                                }
+                                else { errorDescription = ErrorExpected("="); return; }
                             }
-                            else { errorDescription = ErrorExpected("="); return; }
+                            else { errorDescription = "Wrong field name: " + token + ". Check your Magic Album file."; return; }
                         }
-                        else { errorDescription = "Wrong field name: " + token + ". Check your Magic Album file."; return; }
+                        //language = 'English' | 'ENG' | 'Italian' | 'ITA' | 'Korean' | 'KOR' | 'Russian' | 'RUS' | 'Spanish' | 'SPA' | 'French' | 'FRA' | 'Japan' | 'JPN' | 'German' | 'GER' | 'Portuguese' | 'POR' | 'ChineseSimplified' | 'SimplifiedChinese' | 'ZHC' | 'ChineseTraditional' | 'TraditionalChinese' | 'ZHT' | 'Hebrew' | HEB' | 'Arabic' | 'ARA' | 'Latin' | 'LAT' | 'Sanskrit' | 'SAN' | 'AncientGreek' | 'GRK' | 'Phyrexian' | 'PHY';
+                        else if (Regex.IsMatch(token, @"^(?i)English|ENG|Italian|ITA|Korean|KOR|Russian|RUS|Spanish|SPA|French|FRA|Japan|JPN|German|GER|Portuguese|POR|ChineseSimplified|SimplifiedChinese|ZHC|ChineseTraditional|TraditionalChinese|ZHT|Hebrew|HEB|Arabic|ARA|Latin|LAT|Sanskrit|SAN|AncientGreek|GRK|Phyrexian|PHY(?-i)$"))
+                        {
+                            par.language = token;
+                            GetToken(t);
+                        }
+                        //price = ?number?;
+                        else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
+                        {
+                            float.TryParse(token.Substring(1).Replace('.', ','), out par.price);
+                            GetToken(t);
+                        }
+                        //priority = 'p' ?number?;
+                        else if (Regex.IsMatch(token, @"^(?i)p\d+(?-i)$"))
+                        {
+                            Int32.TryParse(token.Substring(1), out par.priority);
+                            GetToken(t);
+                        }
+                        else { errorDescription = "Wrong parameter: " + token + ". Check your Magic Album file."; return; }
                     }
-                    //grade = 'M' | 'Mint' | 'NM/M' | 'NM-' | 'SP+' | 'SP' | 'SP-' | 'MP' | 'MP/HP' | 'HP';
-                    else if (Regex.IsMatch(token, @"^(?i)M|Mint|NM/M|NM-|SP\+|SP|SP-|MP|MP/HP|HP(?-i)$"))
-                    {
-                        par.grade = token;
-                        GetToken(t);
-                    }
-                    //language = 'English' | 'ENG' | 'Italian' | 'ITA' | 'Korean' | 'KOR' | 'Russian' | 'RUS' | 'Spanish' | 'SPA' | 'French' | 'FRA' | 'Japan' | 'JPN' | 'German' | 'GER' | 'Portuguese' | 'POR' | 'ChineseSimplified' | 'SimplifiedChinese' | 'ZHC' | 'ChineseTraditional' | 'TraditionalChinese' | 'ZHT' | 'Hebrew' | HEB' | 'Arabic' | 'ARA' | 'Latin' | 'LAT' | 'Sanskrit' | 'SAN' | 'AncientGreek' | 'GRK' | 'Phyrexian' | 'PHY';
-                    else if (Regex.IsMatch(token, @"^(?i)English|ENG|Italian|ITA|Korean|KOR|Russian|RUS|Spanish|SPA|French|FRA|Japan|JPN|German|GER|Portuguese|POR|ChineseSimplified|SimplifiedChinese|ZHC|ChineseTraditional|TraditionalChinese|ZHT|Hebrew|HEB|Arabic|ARA|Latin|LAT|Sanskrit|SAN|AncientGreek|GRK|Phyrexian|PHY(?-i)$"))
-                    {
-                        par.language = token;
-                        GetToken(t);
-                    }
-                    //price = 'p' ?number?;
-                    else if (Regex.IsMatch(token, @"^p\d+(\.\d+)?$"))
-                    {
-                        float.TryParse(token.Substring(1).Replace('.', ','), out par.price);
-                        GetToken(t);
-                    }
-                    //priority = 'p' ?number?;
-                    else if (Regex.IsMatch(token, @"^(?i)p\d+(?-i)$"))
-                    {
-                        Int32.TryParse(token.Substring(1), out par.priority);
-                        GetToken(t);
-                    }
-                    else { errorDescription = "Wrong parameter: " + token + ". Check your Magic Album file."; return; }
                 }
                 while (!t.endIsReached);
 
@@ -546,7 +553,7 @@ namespace MagicParser
                     if (par.price != 0) par.foilPrice = par.price;
                     if (!String.IsNullOrEmpty(par.grade)) par.foilGrade = par.grade;
                 }
-                else if (par.type == "non-foil" || par.type == "nonfoil" || (par.qty > 0 && par.type == ""))
+                else if (par.type == "non-foil" || (par.qty > 0 && par.type == ""))
                 {
                     if (par.price != 0) par.nonFoilPrice= par.price;
                     if (!String.IsNullOrEmpty(par.grade)) par.nonFoilGrade = par.grade;
@@ -568,7 +575,7 @@ namespace MagicParser
             foreach (Parameter par in parameters)
             {
                 if (par.type.ToLower() == "foil") qtyF += par.qty;
-                else if (par.type.ToLower() == "non-foil" || par.type.ToLower() == "nonfoil" || par.type.ToLower() == "") qtyR += par.qty;
+                else if (par.type.ToLower() == "non-foil" || par.type.ToLower() == "") qtyR += par.qty;
             }
             if (qtyF > entry.qtyF || qtyR > entry.qtyR) { errorDescription = "Wrong cards quantity. Check your Magic Album file."; return; }
 
@@ -592,7 +599,7 @@ namespace MagicParser
             Entry foilEntry = new Entry(entry);
             foreach (Parameter par in parameters)
             {
-                if (par.qty == 0 && (par.type.ToLower() == "non-foil" || par.type.ToLower() == "nonfoil"))
+                if (par.qty == 0 && (par.type.ToLower() == "non-foil"))
                 {
                     SetParameters(nonFoilEntry, par);
                     if (errorDescription != null) return;
@@ -614,7 +621,7 @@ namespace MagicParser
             //Если количество есть (нет типа = указанный 'non-foil' тип)
             foreach (Parameter par in parameters)
             {
-                if (par.qty > 0 && (par.type.ToLower() == "" || par.type.ToLower() == "non-foil" || par.type.ToLower() == "nonfoil"))
+                if (par.qty > 0 && (par.type.ToLower() == "" || par.type.ToLower() == "non-foil")
                 {
                     Entry newEntry = new Entry(nonFoilEntry);
                     newEntry.qty = par.qty;
