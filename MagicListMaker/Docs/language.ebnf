@@ -1,0 +1,89 @@
+input = ([databasesDeclaration] [list] [freeText])*;
+    databasesDeclaration = declarationBeginToken declaration* declarationEndToken;
+        declaration = name '=' "'" path "'";
+        name = '^[a-zA-Z_]\w+$';
+        path = '^(?i)([a-z]+:)?[\\/]?([\\/].*)*[\\/]?(?-i)$';
+    list = listBeginToken listParams listEndToken;
+        listParams = databases [options] [filter] [[grouping] sorting] [formatting];
+            databases = databasesToken '=' "'" dbsValue "'";
+                dbsValue = name+;
+            options = option+;
+                option = parseComments | ?option2? | ?option3?;
+                    parseComments = parseCommentsToken '=' bool;
+            filter = filterToken '=' "'" boolValue "'";
+            grouping = groupingToken '=' "'" groupingValue "'";
+                groupingValue = "'" field+ (',' field+)* "'";
+                    field = ?fieldName?;
+            sorting = sortingToken '=' "'" sortingValue "'";
+                sortingValue = (['!'] field)+;
+            formatting = formattingToken '=' "'" formattingValue "'";
+                formattingValue = ([function] [field] [freeText])*;
+    freeText = ?string that doesn't include keywords?;
+
+
+(* O P E R A T O R S *)
+function = '$' emptyFunction | boolFunction | numberFunction | stringFunction;
+    emptyFunction = brackets;
+        brackets = boolBrackets | numberBrackets | stringBrackets; (* '(' value ')' *)
+    if = numberIf | stringIf;
+
+field = '$' boolField | numberField | stringField;
+
+value = boolValue | numberValue | stringValue;
+    boolValue = or;
+        or = and (('|') and)*;
+            and = equality (('&') equality)*;
+                equality = (comparsion (('=' | '!=') comparsion)*) | (numberValue (('=' | '!=') numberValue)+) | (stringValue (('=' | '!=') stringValue)+);
+                    comparsion = boolArg | numberValue (('>' | '<' | '>=' | '<=') numberValue)+;
+                        boolArg = ['!'] ('$' (boolFunction | boolField)) | boolBrackets |  bool;
+                            boolFunction = contains | ?func1? | ?func2?;
+                                contains = 'contains' '(' stringArg ',' stringArg ')';
+                            boolBrackets = '(' boolValue ')';
+                            boolField = ?boolField?;
+                            bool = 'true' | 'false';
+    numberValue = sum;
+        sum = composition (('+' | '-') composition)*;
+            composition = numberArg (('*' | '/') numberArg)*;
+                numberArg = ['-'] ('$' (numberFunction | numberField)) | numberBrackets |  positiveNumber;
+                    numberFunction = numberIf | ?func1? | ?func2?;
+                        numberIf = 'if' '(' boolValue ',' numberValue [',' numberValue] ')';
+                    numberBrackets = '(' numberValue ')';
+                    numberField = ?numberField?;
+                    positiveNumber = positiveInteger ['.' positiveInteger];
+                        positiveInteger = digit+;
+                            digit = ?digit?;
+    stringValue = stringSum;
+        stringSum = stringArg ('+' stringArg)*;
+            stringArg = ('$' (stringFunction | stringField)) | stringBrackets | string;
+                stringFunction = stringIf | toString | ?func1? | ?func2?;
+                    stringIf = 'if' '(' boolValue ',' stringValue [',' stringValue] ')';
+                    toString = 'toString' '(' value ')';
+                    stringBrackets = '(' stringValue ')';
+                stringField = ?stringField?;
+                string = '"' ?string? '"';
+
+
+(* T O K E N S *)
+
+(* Preset tokens *)
+declarationBeginToken = '<dbs>';
+declarationEndToken = '</dbs>';
+listBeginToken = '<list>';
+listEndToken = '</list>';
+databasesToken = 'dbs';
+parseCommentsToken = 'parseComments';
+filterToken = 'filter';
+groupingToken = 'grouping';
+sortingToken = 'sorting';
+formattingToken = 'formatting';
+(* also there are:
+    '=' - equality token;
+    '!=' - non-equality token;
+    '>'. '<', '>=', '<=' - comparsion tokens;
+    '+', '-', '*', '/' - arithmetic operator tokens
+    ',' - enumeration token;
+    "'" - quotation token;
+    '(' and ')' - brackets tokens;
+    '$' - fieldToken;
+
+*)

@@ -1,0 +1,22 @@
+note = [parameter] ((',' | ';') parameter)*;
+    parameter = [qty] [type] (grade | price | language | dollarRate | discount | comment | priority | field)+;
+    (* Если количество отсутствует - параметр применяется ко всем картам указанного типа.
+       Если количество присутствует - параметр применяется к qty картам указанного типа.
+       type задаёт тип. Если он равен foil - параметр применяется только к фойловым картам, non-foil - только к нефойловым, если не задан - ко всем.
+       Остальная часть parameter - различные свойства, задавая которые можно воздействовать на поля. Свойство field воздействует прямо на указанное поле.
+
+       Любой параметр, применяемый ко всем картам, переопределяет оригинальное поле.
+       Затем любой параметр, применяемый ко всем картам определённого типа, переопределяет всё, что выше.
+       Затем любой параметр, применяемый к определённому числу карт, преопределяет всё, что выше.
+       Затем любой параметр, применяемый к определённому числу карт определённого типа, переопределяет всё, что выше.
+    *)
+        qty = ?integer?;
+        type = 'foil' | 'non-foil' | 'all';
+        grade = 'M' | 'Mint' | 'NM/M' | 'NM-' | 'SP+' | 'SP' | 'SP-' | 'MP' | 'MP/HP' | 'HP';
+        price = ?number?;
+        language = 'English' | 'ENG' | 'Italian' | 'ITA' | 'Korean' | 'KOR' | 'Russian' | 'RUS' | 'Spanish' | 'SPA' | 'French' | 'FRA' | 'Japan' | 'JPN' | 'German' | 'GER' | 'Portuguese' | 'POR' | 'ChineseSimplified' | 'SimplifiedChinese' | ZHC' | 'ChineseTraditional' | 'TraditionalChinese' | 'ZHT';
+        dollarRate = ('c' | 'r')  ?number?;
+        discount = ('d' ?number?) | (?number? '%');
+        comment = '"' ?anyText? '"';
+        priority = 'p' ?number?;
+        field = '$' ?fieldName?;
