@@ -621,7 +621,7 @@ namespace MagicParser
             //Если количество есть (нет типа = указанный 'non-foil' тип)
             foreach (Parameter par in parameters)
             {
-                if (par.qty > 0 && (par.type.ToLower() == "" || par.type.ToLower() == "non-foil")
+                if (par.qty > 0 && (par.type.ToLower() == "" || par.type.ToLower() == "non-foil"))
                 {
                     Entry newEntry = new Entry(nonFoilEntry);
                     newEntry.qty = par.qty;
@@ -759,6 +759,14 @@ namespace MagicParser
                 entry.gradeF = "";
                 entry.sellPrice = 0;
                 entry.buyPrice = 0;
+                //color
+                //cost
+                //legality
+                //pt
+                //set dates
+                //sub types
+                //super types
+                //general types?
             }
         }
         
