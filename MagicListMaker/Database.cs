@@ -15,6 +15,20 @@ namespace MagicParser
     {
         public string fileName { get; set; } //Путь к файлу, из которого берётся выгрузка базы
         public bool notesAsIs { get; set; } //Если указан этот параметр, то при считывании базы комментарии не будут парситься особым образом
+        public float defaultDollarRate { get; set; } //курс доллара, применяемый ко всем картам базы
+        public float defaultDiscount { get; set; } //скидка (или наценка), применяемая ко всем картам базы
+        public float defaultGemMintDiscount { get; set; }
+        public float defaultMintDiscount { get; set; }
+        public float defaultNMMDiscount { get; set; }
+        public float defaultNMDiscount { get; set; }
+        public float defaultNMSPDiscount { get; set; }
+        public float defaultSPDiscount { get; set; }
+        public float defaultSPMPDiscount { get; set; }
+        public float defaultMPDiscount { get; set; }
+        public float defaultMPHPDiscount { get; set; }
+        public float defaultHPDiscount { get; set; }
+        public bool smartRound { get; set; }
+        public int round { get; set; }
         public static string token; //Текущий токен при парсинге с токенайзером
         public string errorDescription;
 
@@ -63,6 +77,7 @@ namespace MagicParser
             public float discount;
             public string comment;
             public string grade;
+            public float originalPrice;
             public float price;
             public int priority; //manual priority
             //public float cmc;
@@ -140,6 +155,20 @@ namespace MagicParser
                 this.fileName = fileName;
             }
             notesAsIs = false;
+            defaultDollarRate = 40;
+            defaultDiscount = 0;
+            defaultGemMintDiscount = 0;
+            defaultMintDiscount = 0;
+            defaultNMMDiscount = 0;
+            defaultNMDiscount = 0;
+            defaultNMSPDiscount = 5;
+            defaultSPDiscount = 15;
+            defaultSPMPDiscount = 20;
+            defaultMPDiscount = 30;
+            defaultMPHPDiscount = 40;
+            defaultHPDiscount = 50;
+            smartRound = true;
+            round = 0;
             cardList = new List<Entry>();
         }
 
@@ -416,8 +445,12 @@ namespace MagicParser
         private void ParseEntry(Entry entry)
         {
             //если есть notes и не стоит флаг 'парсить как есть', то парсим по заметке
-            if (!String.IsNullOrEmpty(entry.notes) && !notesAsIs) ParseNote(entry);
-            if (errorDescription != null) return;
+            if (!String.IsNullOrEmpty(entry.notes) && !notesAsIs)
+            {
+                ParseNote(entry);
+                if (errorDescription != null) return;
+            }
+            
             //если notes отсутствует, то просто разделяем на фойло и не фойло и добавляем
             else if (entry.qtyR >0 && entry.qtyF > 0) ParseFoil(entry);
             //если делить нечего, то просто дописываем нужные поля и добавляем
@@ -448,7 +481,6 @@ namespace MagicParser
                 //[type]
                 if (token.ToLower() == "foil") { GetToken(t); par.type = "foil"; }
                 else if (token.ToLower() == "nonfoil" || token.ToLower() == "non-foil") { GetToken(t); par.type = "non-foil"; }
-                else if (token.ToLower() == "foil") { GetToken(t); par.type = "foil"; }
 
                 //property = price | language | dollarRate | discount | comment | priority | field | grade;
                 bool continueParseGrade = false;
@@ -481,8 +513,8 @@ namespace MagicParser
                                 GetToken(t);
                                 if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
                                 {
-                                    float.TryParse(token.Replace('.', ','), out par.dollarRate);
-                                    par.dollarRate = -par.dollarRate;
+                                    float.TryParse(token.Replace('.', ','), out par.discount);
+                                    par.discount = -par.discount;
                                     GetToken(t);
                                 }
                                 else { errorDescription = ErrorExpected(); return; }
@@ -491,12 +523,12 @@ namespace MagicParser
                         }
                         else if (Regex.IsMatch(token, @"^(?i)d\d+(\.\d+)?(?-i)$"))
                         {
-                            float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
+                            float.TryParse(token.Substring(1).Replace('.', ','), out par.discount);
                             GetToken(t);
                         }
                         else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
                         {
-                            float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.dollarRate);
+                            float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.discount);
                         }
                         //dollarRate = ('c' | 'r')  ?number?;
                         else if (Regex.IsMatch(token, @"^(?i)(c|r)\d+(\.\d+)?(?-i)$"))
@@ -533,7 +565,7 @@ namespace MagicParser
                         //price = ?number?;
                         else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
                         {
-                            float.TryParse(token.Substring(1).Replace('.', ','), out par.price);
+                            float.TryParse(token.Replace('.', ','), out par.price);
                             GetToken(t);
                         }
                         //priority = 'p' ?number?;
@@ -545,7 +577,7 @@ namespace MagicParser
                         else { errorDescription = "Wrong parameter: " + token + ". Check your Magic Album file."; return; }
                     }
                 }
-                while (!t.endIsReached);
+                while (token != "");
 
                 //Корректируем цены и состояния на фойло
                 if (par.type == "foil")
@@ -574,8 +606,8 @@ namespace MagicParser
             int qtyR = 0;
             foreach (Parameter par in parameters)
             {
-                if (par.type.ToLower() == "foil") qtyF += par.qty;
-                else if (par.type.ToLower() == "non-foil" || par.type.ToLower() == "") qtyR += par.qty;
+                if (par.type == "foil") qtyF += par.qty;
+                else if (par.type == "non-foil" || par.type.ToLower() == "") qtyR += par.qty;
             }
             if (qtyF > entry.qtyF || qtyR > entry.qtyR) { errorDescription = "Wrong cards quantity. Check your Magic Album file."; return; }
 
@@ -599,7 +631,7 @@ namespace MagicParser
             Entry foilEntry = new Entry(entry);
             foreach (Parameter par in parameters)
             {
-                if (par.qty == 0 && (par.type.ToLower() == "non-foil"))
+                if (par.qty == 0 && (par.type == "non-foil"))
                 {
                     SetParameters(nonFoilEntry, par);
                     if (errorDescription != null) return;
@@ -608,7 +640,7 @@ namespace MagicParser
                     nonFoilEntry.grade = nonFoilEntry.gradeR;
                     nonFoilEntry.price = nonFoilEntry.priceR;
                 }
-                else if (par.qty == 0 && par.type.ToLower() == "foil")
+                else if (par.qty == 0 && par.type == "foil")
                 {
                     SetParameters(foilEntry, par);
                     if (errorDescription != null) return;
@@ -621,7 +653,7 @@ namespace MagicParser
             //Если количество есть (нет типа = указанный 'non-foil' тип)
             foreach (Parameter par in parameters)
             {
-                if (par.qty > 0 && (par.type.ToLower() == "" || par.type.ToLower() == "non-foil"))
+                if (par.qty > 0 && (par.type == "" || par.type == "non-foil"))
                 {
                     Entry newEntry = new Entry(nonFoilEntry);
                     newEntry.qty = par.qty;
@@ -759,7 +791,110 @@ namespace MagicParser
                 entry.gradeF = "";
                 entry.sellPrice = 0;
                 entry.buyPrice = 0;
+
+                //missing grades
+                if (entry.grade.ToLower() == "gem-mt") entry.grade = "Gem-Mint";
+                else if (entry.grade.ToLower() == "mint") entry.grade = "Mint";
+                else if (string.IsNullOrEmpty(entry.grade) || entry.grade.ToLower() == "nm-mt" || entry.grade.ToLower() == "nm/m") entry.grade = "NM/M";
+                else if (entry.grade.ToLower() == "nm") entry.grade = "NM";
+                else if (entry.grade.ToLower() == "ex-mt") entry.grade = "NM/SP";
+                else if (entry.grade.ToLower() == "ex") entry.grade = "SP";
+                else if (entry.grade.ToLower() == "vg-ex") entry.grade = "SP/MP";
+                else if (entry.grade.ToLower() == "vg") entry.grade = "MP";
+                else if (entry.grade.ToLower() == "good") entry.grade = "MP/HP";
+                else if (entry.grade.ToLower() == "fr") entry.grade = "HP";
+                else if (entry.grade.ToLower() == "poor") entry.grade = "HP";
+
+                //price handling
+                //inherit dollar rate and discount
+                if (entry.dollarRate == 0) entry.dollarRate = defaultDollarRate;
+                if (entry.discount == 0)
+                {
+                    if (entry.grade.ToLower().IndexOf("gem-mt") == 0)
+                    {
+                        if (defaultGemMintDiscount != 0) entry.discount = defaultGemMintDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("mint") == 0)
+                    {
+                        if (defaultMintDiscount != 0) entry.discount = defaultMintDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("nmm") == 0)
+                    {
+                        if (defaultNMMDiscount != 0) entry.discount = defaultNMMDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("nm") == 0)
+                    {
+                        if (defaultNMDiscount != 0) entry.discount = defaultNMDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("nm/sp") == 0)
+                    {
+                        if (defaultNMSPDiscount != 0) entry.discount = defaultNMSPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("sp") == 0)
+                    {
+                        if (defaultSPDiscount != 0) entry.discount = defaultSPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("sp/mp") == 0)
+                    {
+                        if (defaultSPMPDiscount != 0) entry.discount = defaultSPMPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("mp") == 0)
+                    {
+                        if (defaultMPDiscount != 0) entry.discount = defaultMPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("mp/hp") == 0)
+                    {
+                        if (defaultMPHPDiscount != 0) entry.discount = defaultMPHPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("hp") == 0)
+                    {
+                        if (defaultHPDiscount != 0) entry.discount = defaultHPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else entry.discount = defaultDiscount;
+                }
+
+                //set new price if dollar rate is present
+                if (entry.dollarRate != 0)
+                {
+                    entry.originalPrice = entry.price;
+                    entry.price = entry.dollarRate * entry.originalPrice;
+                }
+                //set discount
+                if (entry.discount != 0) entry.price = entry.price * (100 - entry.discount) / 100;
+
+                if (smartRound) //округляем так: есть n цифр, последние n-3 округляем до нуля, третью - до 0 или 5, первые две не округляем.
+                {
+                    entry.price = (float)Math.Round(entry.price);
+                    if (entry.price.ToString().Length >= 3)
+                    {
+                        int r = 5 * (int)Math.Pow(10, entry.price.ToString().Length - 3);
+                        entry.price = (float)Math.Round(entry.price / r) * r;
+                    }
+                    else
+                    {
+
+                    }
+                }
+                else if (round != 0) //округляем до числа, кратного указанному значению
+                {
+                    entry.price = (float)Math.Round(entry.price / round) * round;
+                }
+                
+                //сделать опции round и smart round
+                //подумать над округлением
                 //color
+                //color identity
+
                 //cost
                 //legality
                 //pt

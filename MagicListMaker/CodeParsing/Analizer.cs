@@ -37,11 +37,24 @@ namespace MagicParser.CodeParsing
             keyWords.Add("listEndToken", "endlist");
             keyWords.Add("databasesToken", "dbs");
             keyWords.Add("parseCommentsToken", "parseComments");
+            keyWords.Add("defaultDollarRateToken", "defaultDollarRate");
+            keyWords.Add("defaultDiscountToken", "defaultDiscount");
+            keyWords.Add("defaultGemMintDiscountToken", "defaultGemMintDiscount");
+            keyWords.Add("defaultMintDiscountToken", "defaultMintDiscount");
+            keyWords.Add("defaultNMMDiscountToken", "defaultNMMDiscount");
+            keyWords.Add("defaultNMDiscountToken", "defaultNMDiscount");
+            keyWords.Add("defaultNMSPDiscountToken", "defaultNMSPDiscount");
+            keyWords.Add("defaultSPDiscountToken", "defaultSPDiscount");
+            keyWords.Add("defaultSPMPDiscountToken", "defaultSPMPDiscount");
+            keyWords.Add("defaultMPDiscountToken", "defaultMPDiscount");
+            keyWords.Add("defaultMPHPDiscountToken", "defaultMPHPDiscount");
+            keyWords.Add("defaultHPDiscountToken", "defaultHPDiscount");
+            keyWords.Add("smartRoundToken", "smartRound");
+            keyWords.Add("roundToken", "round");
             keyWords.Add("filterToken", "filter");
             keyWords.Add("groupingToken", "group");
             keyWords.Add("sortingToken", "sort");
             keyWords.Add("formattingToken", "format");
-            
         }
 
 
@@ -203,22 +216,292 @@ namespace MagicParser.CodeParsing
             else { errorDescription = "You must choose databases you want to use in the listing."; return ""; }
 
             //[options] [filter] [[grouping] sorting] [formatting]
-            //options = option+;
-            //option = parseComments
-            //parseComments = parseCommentsToken '=' bool
-            if (GetNextToken(t).ToLower() == keyWords["parseCommentsToken"].ToLower())
+            //options = option+
+            //option = parseComments | defaultDollarRate | defaultDiscount | smartRound | round
+            while (true)
             {
-                GetToken(t);
-                GetToken(t);
-                if (token == "=")
+                //parseComments = parseCommentsToken '=' bool
+                if (GetNextToken(t).ToLower() == keyWords["parseCommentsToken"].ToLower())
                 {
                     GetToken(t);
-                    if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.notesAsIs = true;
-                    else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.notesAsIs = false;
-                    else { errorDescription = ErrorExpected("Bool value", false); return ""; }
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.notesAsIs = false;
+                        else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.notesAsIs = true;
+                        else { errorDescription = ErrorExpected("Bool value", false); return ""; }
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
                 }
-                else { errorDescription = ErrorExpected("="); return ""; }
+
+                //defaultDollarRate = defaultDollarRateToken '=' ['-'] positiveNumber
+                if (GetNextToken(t).ToLower() == keyWords["defaultDollarRateToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float rate = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out rate)) foreach (Database db in currentDBs) db.defaultDollarRate = reverseOutput ? -rate : rate;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                //defaultDiscount = defaultDiscountsToken '=' ['-'] positiveNumber ['%']
+                //defaultDiscountsToken = defaultDiscountToken | defaultGemMintDiscountToken | defaultMintDiscountToken | defaultNMMDiscountToken | defaultNMDiscountToken | defaultNMSPDiscountToken | defaultSPDiscountToken | defaultSPMPDiscountToken | defaultMPDiscountToken | defaultMPHPDiscountToken | defaultHPDiscountToken
+                if (GetNextToken(t).ToLower() == keyWords["defaultDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultGemMintDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultGemMintDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultMintDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMintDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultNMMDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMMDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultNMDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMMDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultNMSPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMSPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultSPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultSPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultSPMPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultSPMPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultMPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultMPHPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMPHPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                if (GetNextToken(t).ToLower() == keyWords["defaultHPDiscountToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        bool reverseOutput = false;
+                        float discount = 0;
+                        if (token == "-") { reverseOutput = true; GetToken(t); }
+                        if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultHPDiscount = reverseOutput ? -discount : discount;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                //smartRound = smartRoundToken '=' bool
+                if (GetNextToken(t).ToLower() == keyWords["smartRoundToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.smartRound = false;
+                        else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.smartRound = true;
+                        else { errorDescription = ErrorExpected("Bool value", false); return ""; }
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                //round = roundToken '=' positiveNumber
+                if (GetNextToken(t).ToLower() == keyWords["roundToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        float round = 0;
+                        if (float.TryParse(token.Replace('.', ','), out round)) foreach (Database db in currentDBs) db.defaultHPDiscount = round;
+                        else { errorDescription = ErrorExpected("Number value", false); return ""; }
+
+                        if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                break;
             }
+            
 
             //После определения всех опций про парсинг парсим базы
             foreach (Database db in currentDBs)
