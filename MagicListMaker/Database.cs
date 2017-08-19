@@ -29,6 +29,7 @@ namespace MagicParser
         public float defaultHPDiscount { get; set; }
         public bool smartRound { get; set; }
         public int round { get; set; }
+        public bool handleMultiNames;
         public static string token; //Текущий токен при парсинге с токенайзером
         public string errorDescription;
 
@@ -169,6 +170,7 @@ namespace MagicParser
             defaultHPDiscount = 50;
             smartRound = true;
             round = 0;
+            handleMultiNames = true;
             cardList = new List<Entry>();
         }
 
@@ -889,12 +891,21 @@ namespace MagicParser
                 {
                     entry.price = (float)Math.Round(entry.price / round) * round;
                 }
-                
-                //сделать опции round и smart round
-                //подумать над округлением
+
+                //name handling
+                entry.name = entry.name.Replace('’', '\'');
+                entry.nameOracle = entry.nameOracle.Replace('’', '\'');
+                //There several multi-name types of cards that are written like "name1|name2".
+                //On TopDeck I need to separate with whitespace or any symbol 'werewolf' and Kamigawa cards into two names ("name1 name2" or keep original "name1|name2") and paste together other cards ("name1name2") (like "DeadGone" or "CommitMemory").
+                //'Werewolves' and Kamigawa cards have only one cost, the others - two (or more... Who│What│When│Where│Why)
+                if (handleMultiNames && entry.cost.Contains("|") && entry.nameOracle.Contains("|"))
+                {
+                    entry.name = entry.name.Replace("|", "");
+                    entry.nameOracle = entry.nameOracle.Replace("|", "");
+                }
+
                 //color
                 //color identity
-
                 //cost
                 //legality
                 //pt

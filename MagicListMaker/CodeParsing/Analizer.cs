@@ -51,6 +51,7 @@ namespace MagicParser.CodeParsing
             keyWords.Add("defaultHPDiscountToken", "defaultHPDiscount");
             keyWords.Add("smartRoundToken", "smartRound");
             keyWords.Add("roundToken", "round");
+            keyWords.Add("handleMultiNamesToken", "handleMultiNames");
             keyWords.Add("filterToken", "filter");
             keyWords.Add("groupingToken", "group");
             keyWords.Add("sortingToken", "sort");
@@ -217,7 +218,7 @@ namespace MagicParser.CodeParsing
 
             //[options] [filter] [[grouping] sorting] [formatting]
             //options = option+
-            //option = parseComments | defaultDollarRate | defaultDiscount | smartRound | round
+            //option = parseComments | defaultDollarRate | defaultDiscount | smartRound | round | handleMultiNames
             while (true)
             {
                 //parseComments = parseCommentsToken '=' bool
@@ -494,6 +495,22 @@ namespace MagicParser.CodeParsing
                         else { errorDescription = ErrorExpected("Number value", false); return ""; }
 
                         if (GetNextToken(t) == "%") GetToken(t);
+                    }
+                    else { errorDescription = ErrorExpected("="); return ""; }
+                    continue;
+                }
+
+                //handleMultiNames = handleMultiNamesToken '=' bool;
+                if (GetNextToken(t).ToLower() == keyWords["handleMultiNamesToken"].ToLower())
+                {
+                    GetToken(t);
+                    GetToken(t);
+                    if (token == "=")
+                    {
+                        GetToken(t);
+                        if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.handleMultiNames = false;
+                        else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.handleMultiNames = true;
+                        else { errorDescription = ErrorExpected("Bool value", false); return ""; }
                     }
                     else { errorDescription = ErrorExpected("="); return ""; }
                     continue;
