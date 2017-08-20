@@ -89,7 +89,6 @@ namespace MagicParser
             #endregion
 
             #region Service fields
-            public bool bothFoilAndNonFoil;
             public int groupID;
             #endregion
 
@@ -169,12 +168,12 @@ namespace MagicParser
             defaultMPHPDiscount = 40;
             defaultHPDiscount = 50;
             smartRound = true;
-            round = 0;
+            round = 1;
             handleMultiNames = true;
             cardList = new List<Entry>();
         }
 
-        #region Private methods
+        #region General methods
 
         private void GetToken(Tokenizer t)
         {
@@ -205,6 +204,10 @@ namespace MagicParser
         {
             return "Unexpected token: " + token + ". You must " + whatToDo + " in single quotes.";
         }
+
+        #endregion
+
+        #region Parse methods
 
         //Основной метод, считывающий и парсящий выгрузку
         public void ReadFile()
@@ -464,7 +467,7 @@ namespace MagicParser
         //Парсит по комментарию
         private void ParseNote(Entry entry)
         {
-            //note = [parameter] ((',' | ';') parameter)*['.'];
+            //note = [parameter] ((',' | ';') parameter)* ['.'];
             string note = entry.notes;
             //удаляем одну точку в конце, если она есть (потому что я могу её поставить)
             if (note[note.Count() - 1] == '.') note = note.Remove(note.Count() - 1);
@@ -491,20 +494,20 @@ namespace MagicParser
                     //grade = ('M' | 'Mint' | 'NM' | 'SP' | 'MP' | 'HP') ?anyText?;
                     if (Regex.IsMatch(token, @"^(?i)M|Mint|NM|SP|MP|HP(?-i)$"))
                     {
-                        if (continueParseGrade) par.grade += token;
+                        if (continueParseGrade) { par.grade += " "; par.grade += token; }
                         else par.grade = token;
-                        continueParseGrade = true; //если дальше есть ещё символы, не относящиеся к другим параметрам, то это скорее всего grade
+                        continueParseGrade = true; //если дальше есть ещё символы и слова, не относящиеся к другим параметрам, то это скорее всего grade
                         GetToken(t);
                     }
                     else
                     {
-                        continueParseGrade = false;
                         //comment = '"' ?anyText? '"';
                         if (token == "\"")
                         {
                             token = t.GetUntil('"');
                             par.comment = token;
                             GetToken(t);
+                            continueParseGrade = false;
                         }
                         //discount = ('d' ?number?) | (?number? '%');
                         else if (token.ToLower() == "d")
@@ -522,21 +525,25 @@ namespace MagicParser
                                 else { errorDescription = ErrorExpected(); return; }
                             }
                             else { errorDescription = ErrorExpected(); return; }
+                            continueParseGrade = false;
                         }
                         else if (Regex.IsMatch(token, @"^(?i)d\d+(\.\d+)?(?-i)$"))
                         {
                             float.TryParse(token.Substring(1).Replace('.', ','), out par.discount);
                             GetToken(t);
+                            continueParseGrade = false;
                         }
                         else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
                         {
                             float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.discount);
+                            continueParseGrade = false;
                         }
                         //dollarRate = ('c' | 'r')  ?number?;
                         else if (Regex.IsMatch(token, @"^(?i)(c|r)\d+(\.\d+)?(?-i)$"))
                         {
                             float.TryParse(token.Substring(1).Replace('.', ','), out par.dollarRate);
                             GetToken(t);
+                            continueParseGrade = false;
                         }
                         //field = '$' ?fieldName? '=' ?anyText?;
                         else if (token == "$")
@@ -557,23 +564,32 @@ namespace MagicParser
                                 else { errorDescription = ErrorExpected("="); return; }
                             }
                             else { errorDescription = "Wrong field name: " + token + ". Check your Magic Album file."; return; }
+                            continueParseGrade = false;
                         }
                         //language = 'English' | 'ENG' | 'Italian' | 'ITA' | 'Korean' | 'KOR' | 'Russian' | 'RUS' | 'Spanish' | 'SPA' | 'French' | 'FRA' | 'Japan' | 'JPN' | 'German' | 'GER' | 'Portuguese' | 'POR' | 'ChineseSimplified' | 'SimplifiedChinese' | 'ZHC' | 'ChineseTraditional' | 'TraditionalChinese' | 'ZHT' | 'Hebrew' | HEB' | 'Arabic' | 'ARA' | 'Latin' | 'LAT' | 'Sanskrit' | 'SAN' | 'AncientGreek' | 'GRK' | 'Phyrexian' | 'PHY';
                         else if (Regex.IsMatch(token, @"^(?i)English|ENG|Italian|ITA|Korean|KOR|Russian|RUS|Spanish|SPA|French|FRA|Japan|JPN|German|GER|Portuguese|POR|ChineseSimplified|SimplifiedChinese|ZHC|ChineseTraditional|TraditionalChinese|ZHT|Hebrew|HEB|Arabic|ARA|Latin|LAT|Sanskrit|SAN|AncientGreek|GRK|Phyrexian|PHY(?-i)$"))
                         {
                             par.language = token;
                             GetToken(t);
+                            continueParseGrade = false;
                         }
                         //price = ?number?;
                         else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)$"))
                         {
                             float.TryParse(token.Replace('.', ','), out par.price);
                             GetToken(t);
+                            continueParseGrade = false;
                         }
                         //priority = 'p' ?number?;
                         else if (Regex.IsMatch(token, @"^(?i)p\d+(?-i)$"))
                         {
                             Int32.TryParse(token.Substring(1), out par.priority);
+                            GetToken(t);
+                            continueParseGrade = false;
+                        }
+                        else if (continueParseGrade)
+                        {
+                            par.grade += " "; par.grade += token;
                             GetToken(t);
                         }
                         else { errorDescription = "Wrong parameter: " + token + ". Check your Magic Album file."; return; }
@@ -865,26 +881,26 @@ namespace MagicParser
                     else entry.discount = defaultDiscount;
                 }
 
+                entry.originalPrice = entry.price;
                 //set new price if dollar rate is present
-                if (entry.dollarRate != 0)
-                {
-                    entry.originalPrice = entry.price;
-                    entry.price = entry.dollarRate * entry.originalPrice;
-                }
+                if (entry.dollarRate != 0) entry.price = entry.dollarRate * entry.originalPrice;
+                
                 //set discount
                 if (entry.discount != 0) entry.price = entry.price * (100 - entry.discount) / 100;
 
                 if (smartRound) //округляем так: есть n цифр, последние n-3 округляем до нуля, третью - до 0 или 5, первые две не округляем.
                 {
-                    entry.price = (float)Math.Round(entry.price);
-                    if (entry.price.ToString().Length >= 3)
+                    string priceAsString = entry.price.ToString();
+                    int dotPosition = priceAsString.IndexOf(',');
+                    if (dotPosition != -1 && priceAsString.Substring(0, dotPosition).Length >=3)
                     {
-                        int r = 5 * (int)Math.Pow(10, entry.price.ToString().Length - 3);
+                        int r = 5 * (int)Math.Pow(10, priceAsString.Substring(0, dotPosition).Length - 3);
                         entry.price = (float)Math.Round(entry.price / r) * r;
                     }
-                    else
+                    else if (priceAsString.Length >= 3)
                     {
-
+                        int r = 5 * (int)Math.Pow(10, priceAsString.Length - 3);
+                        entry.price = (float)Math.Round(entry.price / r) * r;
                     }
                 }
                 else if (round != 0) //округляем до числа, кратного указанному значению

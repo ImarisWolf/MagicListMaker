@@ -1,4 +1,4 @@
-note = [parameter] ((',' | ';') parameter)*;
+note = [parameter] ((',' | ';') parameter)* ['.'];
     parameter = [qty] [type] (price | language | dollarRate | discount | comment | priority | field | grade)+;
     (* Если количество отсутствует - параметр применяется ко всем картам указанного типа.
        Если количество присутствует - параметр применяется к qty картам указанного типа.

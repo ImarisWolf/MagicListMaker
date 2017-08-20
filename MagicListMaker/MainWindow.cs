@@ -115,26 +115,27 @@ namespace MagicParser
 
         private void InputTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (selectChanged)
+            //if (selectChanged)
+            //{
+            if (changed == false) { changed = true; }
+            Analizer a = new Analizer(InputTextBox.Text);
+            //selectChanged = false;
+            string parsedText = a.Parse();
+            OutputTextBox.Text = parsedText;
+            if (a.errorDescription != null)
             {
-                if (changed == false) { changed = true; }
-                Analizer a = new Analizer(InputTextBox.Text);
-                selectChanged = false;
-                string parsedText = a.Parse();
-                OutputTextBox.Text = parsedText;
-                if (a.errorDescription != null)
-                {
-                    OutputTextBox.ForeColor = Color.Gray;
-                    ErrorLogTextBox.Text = a.errorDescription + "\r\nDouble click to set position onto the error.";
-                }
-                else
-                {
-                    OutputTextBox.ForeColor = Color.Black;
-                    ErrorLogTextBox.Text = "";
-                }
-                a.Paint(InputTextBox);
-                selectChanged = true;
+                OutputTextBox.ForeColor = Color.Gray;
+                ErrorLogTextBox.Text = a.errorDescription + "\r\nDouble click to set position onto the error.";
             }
+            else
+            {
+                OutputTextBox.ForeColor = Color.Black;
+                ErrorLogTextBox.Text = "";
+            }
+            //a.Paint(InputTextBox);
+            //selectChanged = true;
+            
+            //}
             
         }
 
@@ -182,7 +183,7 @@ namespace MagicParser
             rightStartSize = OutputTextBox.Size;
             rightStartPos = OutputTextBox.Left;
             font = InputTextBox.Font;
-        }
+    }
 
         private void InputTextBox_KeyDown(object sender, KeyEventArgs e)
         {

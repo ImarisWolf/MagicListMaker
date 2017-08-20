@@ -130,7 +130,6 @@
             this.InputTextBox.Size = new System.Drawing.Size(380, 472);
             this.InputTextBox.TabIndex = 1;
             this.InputTextBox.Text = "";
-            this.InputTextBox.SelectionChanged += new System.EventHandler(this.InputTextBox_SelectionChanged);
             this.InputTextBox.TextChanged += new System.EventHandler(this.InputTextBox_TextChanged);
             this.InputTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputTextBox_KeyDown);
             // 

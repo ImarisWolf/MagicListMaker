@@ -93,7 +93,6 @@ namespace MagicParser.CodeParsing
             return "Unexpected token: " + token + ". You must " + whatToDo + " in single quotes.";
         }
 
-
         #endregion
 
 
@@ -1244,8 +1243,6 @@ namespace MagicParser.CodeParsing
             {
                 case "foil":
                     output = card.foil; break;
-                case "bothfoilandnonfoil":
-                    output = card.bothFoilAndNonFoil; break;
                 default:
                     errorDescription = "Wrong value name: " + token; output = false; break;
             }
@@ -1435,6 +1432,8 @@ namespace MagicParser.CodeParsing
                     output = card.dollarRate; break;
                 case "discount":
                     output = card.discount; break;
+                case "originalprice":
+                    output = card.originalPrice; break;
                 case "price":
                     output = card.price; break;
                 case "priority":
