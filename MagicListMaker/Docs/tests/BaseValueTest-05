@@ -1,0 +1,10 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\test.txt'
+enddbs
+
+list
+dbs = 'Testdb'
+parseComments = false
+sort = 'nameOracle'
+format = '$qty $nameOracle'
+endlist

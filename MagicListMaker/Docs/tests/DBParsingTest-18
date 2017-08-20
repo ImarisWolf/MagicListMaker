@@ -1,0 +1,15 @@
+dbs
+testDB1 = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\mergeTest-1.txt'
+enddbs
+
+dbs
+testDB2 = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\mergeTest-2.txt'
+testDB3 = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\mergeTest-3.txt'
+enddbs
+
+list
+dbs = 'testDB1 testDB2 testDB3'
+parseComments = false
+sort = 'nameOracle'
+format = '$qty $nameOracle - $language'
+endlist

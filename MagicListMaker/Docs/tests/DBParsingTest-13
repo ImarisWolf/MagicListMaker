@@ -1,0 +1,10 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\oneColumn-2.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseComments = false
+sort = 'cost'
+format = '$cost'
+endlist

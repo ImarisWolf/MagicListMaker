@@ -232,15 +232,19 @@ namespace MagicParser
         private string ErrorExpected(string expected = "", bool quotes = true)
         {
             string output = "";
-            if (token != "'") output = "Unexpected token: '" + token + "' .";
-            else output = "Unexpected token: \"" + token + "\" .";
+            string space = " ";
+            if (token != "")
+            {
+                if (token != "'") output = "Unexpected token: '" + token + "'.";
+                else output = "Unexpected token: \"" + token + "\" .";
+            }
+            else space = "";
 
             if (expected != "")
             {
-                if (quotes) output += " '" + expected + "' expected.";
-                else output += " " + expected + " expected.";
+                if (quotes) output += space + "'" + expected + "' expected.";
+                else output += space + expected + " expected.";
             }
-            output += " Check your Magic Album file.";
             return output;
         }
 
@@ -999,26 +1003,51 @@ namespace MagicParser
                     //проверяем, что таких же точно карт ещё нет в мёрженной базе (но только если делаем обход по второй и более базе - для оптимизации)
                     if (!firstBase)
                     {
+                        bool differentCards = true;
+                        //Обходим все уже замёрженные карты в поисках клона
                         foreach (Entry entry in mergedDB.cardList)
                         {
                             FieldInfo[] fields = typeof(Entry).GetFields();
-                            bool different = false;
+                            bool differentFields = false;
                             foreach (FieldInfo field in fields)
                             {
-                                if (field.Name != "qty" && field.GetValue(entry) != field.GetValue(card))
+                                if (field.GetValue(entry).GetType() == typeof(bool))
                                 {
-                                    different = true;
-                                    break;
+                                    bool e = (bool)field.GetValue(entry);
+                                    bool c = (bool)field.GetValue(card);
+                                    if (e != c) { differentFields = true; break; }
                                 }
+                                else if (field.GetValue(entry).GetType() == typeof(int) && field.Name != "qty")
+                                {
+                                    int e = (int)field.GetValue(entry);
+                                    int c = (int)field.GetValue(card);
+                                    if (e != c) { differentFields = true; break; }
+                                }
+                                else if (field.GetValue(entry).GetType() == typeof(float))
+                                {
+                                    float e = (float)field.GetValue(entry);
+                                    float c = (float)field.GetValue(card);
+                                    if (e != c) { differentFields = true; break; }
+                                }
+                                else if (field.GetValue(entry).GetType() == typeof(string))
+                                {
+                                    string e = (string)field.GetValue(entry);
+                                    string c = (string)field.GetValue(card);
+                                    if (e != c) { differentFields = true; break; }
+                                }
+                                
                             }
                             //если такая же карта уже есть - надо просто прибавить количество
-                            if (!different)
+                            if (!differentFields)
                             {
                                 entry.qty += card.qty;
+                                differentCards = false;
+                                break;
                             }
-                            //Иначе добавляем как новую запись
-                            else mergedDB.cardList.Add(card);
+                            //Если уже нашли клона - дальше обходить цикл бессмысленно
+                            if (!differentCards) break;
                         }
+                        if (differentCards) mergedDB.cardList.Add(card);
                     }
                     else mergedDB.cardList.Add(card);
                 }

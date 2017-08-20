@@ -1,0 +1,3 @@
+dbs
+testDB = '\\DeerServer\DeerStorage\test.txt'
+enddbs

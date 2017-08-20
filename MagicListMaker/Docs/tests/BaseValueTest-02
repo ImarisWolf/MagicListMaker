@@ -1,0 +1,11 @@
+dbs
+testDB1 = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\test1.txt'
+testDB2 = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\test2.txt'
+enddbs
+
+list
+dbs = 'testDB1 testDB2'
+parseComments = false
+sort = 'nameOracle'
+format = '$qty $nameOracle'
+endlist

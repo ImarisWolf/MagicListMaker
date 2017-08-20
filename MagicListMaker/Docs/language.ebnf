@@ -1,5 +1,5 @@
 input = ([databasesDeclaration] [list] [freeText])*;
-    databasesDeclaration = declarationBeginToken declaration* declarationEndToken;
+    databasesDeclaration = declarationBeginToken declaration+ declarationEndToken;
         declaration = name '=' "'" path "'";
         name = '^[a-zA-Z_]\w+$';
         path = '^(?i)([a-z]+:)?[\\/]?([\\/].*)*[\\/]?(?-i)$';
