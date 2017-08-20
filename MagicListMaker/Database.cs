@@ -92,8 +92,52 @@ namespace MagicParser
             public int groupID;
             #endregion
 
-            public Entry() { }
-            public Entry(Entry entry)
+            public Entry()
+            {
+                artist = "";
+                border = "";
+                buyPrice = 0;
+                buyQty = 0;
+                color = "";
+                copyright = "";
+                cost = "";
+                gradeF = "";
+                gradeR = "";
+                language = "";
+                legality = "";
+                name = "";
+                nameOracle = "";
+                notes = "";
+                number = "";
+                pt = "";
+                priceF = 0;
+                priceR = 0;
+                proxies = 0;
+                qtyF = 0;
+                qtyR = 0;
+                rarity = "";
+                rating = 0;
+                sellPrice = 0;
+                sellQty = 0;
+                set = "";
+                text = "";
+                textOracle = "";
+                type = "";
+                typeOracle = "";
+                used = 0;
+                version = "";
+
+                qty = 0;
+                foil = false;
+                dollarRate = 0;
+                discount = 0;
+                comment = "";
+                grade = "";
+                originalPrice = 0;
+                price = 0;
+                priority = 0;
+        }
+        public Entry(Entry entry)
             {
                 FieldInfo[] fields = typeof(Entry).GetFields();
                 foreach (FieldInfo field in fields)
@@ -290,6 +334,14 @@ namespace MagicParser
         {
             //считывает строку за строкой и парсит самые базовые поля
             string currentLine = sr.ReadLine();
+            
+            //Обработка для двух багованных азиатских карт, у которых в типе стоит перевод строки
+            if (currentLine.Contains("トークン・クリーチャー ― ヘリオン") || currentLine.Contains("生物～海蛇"))
+            {
+                currentLine += "  ";
+                currentLine += sr.ReadLine();
+            }
+            
             while (currentLine != null && currentLine != "")
             {
                 //создаём запись
@@ -920,6 +972,8 @@ namespace MagicParser
                     entry.nameOracle = entry.nameOracle.Replace("|", "");
                 }
 
+                //Обработка для багованной японской карты
+                if (entry.type == "トークン・クリーチャー ― ヘリオン  トークン・クリーチャー ― ヘリオン") entry.type = "トークン・クリーチャー ― ヘリオン";
                 //color
                 //color identity
                 //cost
@@ -937,13 +991,40 @@ namespace MagicParser
         public static Database Merge(List<Database> dbs)
         {
             Database mergedDB = new Database();
+            bool firstBase = true;
             foreach (Database db in dbs)
             {
                 foreach (Entry card in db.cardList)
                 {
-                    mergedDB.cardList.Add(card);
+                    //проверяем, что таких же точно карт ещё нет в мёрженной базе (но только если делаем обход по второй и более базе - для оптимизации)
+                    if (!firstBase)
+                    {
+                        foreach (Entry entry in mergedDB.cardList)
+                        {
+                            FieldInfo[] fields = typeof(Entry).GetFields();
+                            bool different = false;
+                            foreach (FieldInfo field in fields)
+                            {
+                                if (field.Name != "qty" && field.GetValue(entry) != field.GetValue(card))
+                                {
+                                    different = true;
+                                    break;
+                                }
+                            }
+                            //если такая же карта уже есть - надо просто прибавить количество
+                            if (!different)
+                            {
+                                entry.qty += card.qty;
+                            }
+                            //Иначе добавляем как новую запись
+                            else mergedDB.cardList.Add(card);
+                        }
+                    }
+                    else mergedDB.cardList.Add(card);
                 }
+                firstBase = false;
             }
+            
             return mergedDB;
         }
     }
