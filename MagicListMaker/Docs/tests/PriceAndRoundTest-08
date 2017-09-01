@@ -1,0 +1,13 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\money-06.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+smartRound = true
+minimumPrice = 1
+defaultDollarRate = 1
+sort = 'nameOracle'
+format = '$qty $nameOracle - $grade - $("$")$originalPrice / $price руб. (dollar rate: $dollarRate, discount: $discount)'
+endlist

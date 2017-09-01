@@ -44,6 +44,7 @@ namespace MagicParser.CodeParsing
         public static string defaultHPDiscountToken      = "defaultHPDiscount";
         public static string smartRoundToken             = "smartRound";
         public static string roundToken                  = "round";
+        public static string minimumPriceToken           = "minimumPrice";
         public static string handleMultiNamesToken       = "handleMultiNames";
 
         public static string filterToken                 = "filter";

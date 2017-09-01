@@ -55,6 +55,7 @@ namespace MagicParser.CodeParsing
             tokens.Add(new Token(Token.defaultHPDiscountToken,      true, "number", typeof(Database).GetField("defaultHPDiscount")));
             tokens.Add(new Token(Token.smartRoundToken,             true, "bool",   typeof(Database).GetField("smartRound")));
             tokens.Add(new Token(Token.roundToken,                  true, "number", typeof(Database).GetField("round")));
+            tokens.Add(new Token(Token.minimumPriceToken,           true, "number", typeof(Database).GetField("minimumPrice")));
             tokens.Add(new Token(Token.handleMultiNamesToken,       true, "bool",   typeof(Database).GetField("handleMultiNames")));
 
             tokens.Add(new Token(Token.filterToken));

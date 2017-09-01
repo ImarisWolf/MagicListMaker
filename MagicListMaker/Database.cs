@@ -29,6 +29,7 @@ namespace MagicParser
         public float defaultHPDiscount;
         public bool smartRound;
         public float round;
+        public float minimumPrice;
         public bool handleMultiNames;
         public static string token; //Текущий токен при парсинге с токенайзером
         public string errorDescription;
@@ -943,14 +944,9 @@ namespace MagicParser
                         if (defaultMintDiscount != 0) entry.discount = defaultMintDiscount;
                         else entry.discount = defaultDiscount;
                     }
-                    else if (entry.grade.ToLower().IndexOf("nmm") == 0)
+                    else if (entry.grade.ToLower().IndexOf("nm/m") == 0)
                     {
                         if (defaultNMMDiscount != 0) entry.discount = defaultNMMDiscount;
-                        else entry.discount = defaultDiscount;
-                    }
-                    else if (entry.grade.ToLower().IndexOf("nm") == 0)
-                    {
-                        if (defaultNMDiscount != 0) entry.discount = defaultNMDiscount;
                         else entry.discount = defaultDiscount;
                     }
                     else if (entry.grade.ToLower().IndexOf("nm/sp") == 0)
@@ -958,9 +954,9 @@ namespace MagicParser
                         if (defaultNMSPDiscount != 0) entry.discount = defaultNMSPDiscount;
                         else entry.discount = defaultDiscount;
                     }
-                    else if (entry.grade.ToLower().IndexOf("sp") == 0)
+                    else if (entry.grade.ToLower().IndexOf("nm") == 0)
                     {
-                        if (defaultSPDiscount != 0) entry.discount = defaultSPDiscount;
+                        if (defaultNMDiscount != 0) entry.discount = defaultNMDiscount;
                         else entry.discount = defaultDiscount;
                     }
                     else if (entry.grade.ToLower().IndexOf("sp/mp") == 0)
@@ -968,14 +964,19 @@ namespace MagicParser
                         if (defaultSPMPDiscount != 0) entry.discount = defaultSPMPDiscount;
                         else entry.discount = defaultDiscount;
                     }
-                    else if (entry.grade.ToLower().IndexOf("mp") == 0)
+                    else if (entry.grade.ToLower().IndexOf("sp") == 0)
                     {
-                        if (defaultMPDiscount != 0) entry.discount = defaultMPDiscount;
+                        if (defaultSPDiscount != 0) entry.discount = defaultSPDiscount;
                         else entry.discount = defaultDiscount;
                     }
                     else if (entry.grade.ToLower().IndexOf("mp/hp") == 0)
                     {
                         if (defaultMPHPDiscount != 0) entry.discount = defaultMPHPDiscount;
+                        else entry.discount = defaultDiscount;
+                    }
+                    else if (entry.grade.ToLower().IndexOf("mp") == 0)
+                    {
+                        if (defaultMPDiscount != 0) entry.discount = defaultMPDiscount;
                         else entry.discount = defaultDiscount;
                     }
                     else if (entry.grade.ToLower().IndexOf("hp") == 0)
@@ -997,21 +998,36 @@ namespace MagicParser
                 {
                     string priceAsString = entry.price.ToString();
                     int dotPosition = priceAsString.IndexOf(',');
-                    if (dotPosition != -1 && priceAsString.Substring(0, dotPosition).Length >=3)
+                    if (dotPosition != -1) //точка есть
                     {
-                        int r = 5 * (int)Math.Pow(10, priceAsString.Substring(0, dotPosition).Length - 3);
-                        entry.price = (float)Math.Round(entry.price / r) * r;
+                        if (priceAsString.Substring(0, dotPosition).Length >= 3) //до точки 3 или больше цифр
+                        {
+                            int r = 5 * (int)Math.Pow(10, priceAsString.Substring(0, dotPosition).Length - 3);
+                            entry.price = (float)Math.Round(entry.price / r) * r;
+                        }
+                        else //до точки меньше трёх цифр
+                        {
+                            entry.price = (float)Math.Round(entry.price);
+                        }
                     }
-                    else if (priceAsString.Length >= 3)
+                    else //точки нет
                     {
-                        int r = 5 * (int)Math.Pow(10, priceAsString.Length - 3);
-                        entry.price = (float)Math.Round(entry.price / r) * r;
+                        if (priceAsString.Length >= 3) //число содержит 3 или более цифры
+                        {
+                            int r = 5 * (int)Math.Pow(10, priceAsString.Length - 3);
+                            entry.price = (float)Math.Round(entry.price / r) * r;
+                        }
+                        else //число содержит меньше трёх цифр
+                        {
+                            entry.price = (float)Math.Round(entry.price);
+                        }
                     }
                 }
                 else if (round != 0) //округляем до числа, кратного указанному значению
                 {
                     entry.price = (float)Math.Round(entry.price / round) * round;
                 }
+                if (entry.price < minimumPrice) entry.price = minimumPrice;
 
                 //name handling
                 entry.name = entry.name.Replace('’', '\'');

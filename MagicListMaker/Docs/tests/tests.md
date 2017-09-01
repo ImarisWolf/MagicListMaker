@@ -118,15 +118,16 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 
 ### Price and round testings
 **Check:**
-+ defaultDollarRate works correctly;
-+ dollar rate in card field overrides defaultDollarRate;
-+ discount in card field overrides defaultDiscount and all default discounts for grades;
-+ in other cases, for graded cards, if default discount for these cards is not 0, default discounts for grades are used;
-+ in any other cases, default discount is used;
-+ smart round works correctly regardless of if round option is set or not;
-+ if smartRound is off and round is different from 0, round works and does it correctly (with fractional numbers and integers as a parameter);
-+ price that is less than 1 is rounded to 1;
-+ all default options work according to default if the appropriate options aren't set;
++ defaultDollarRate works correctly; `01`
++ dollar rate in card field overrides defaultDollarRate; `02`
++ discount in card field overrides defaultDiscount and all default discounts for grades; `03`
++ in other cases, for graded cards, if default discount for these cards is not 0, default discounts for grades are used; `04`
++ in any other cases, default discount is used; `05`
++ smart round works correctly regardless of if round option is set or not; `06` `07`
++ minimum price works if it is different from 0; `08` `09`
++ if smartRound is off and round is 0, no round applies; `10`
++ if smartRound is off and round is different from 0, round works and does it correctly (with fractional numbers and integers as a parameter); `11` - `14`
++ all default options work according to default if the appropriate options aren't set; `15`
 
 ### Other options testings
 **Check:**
