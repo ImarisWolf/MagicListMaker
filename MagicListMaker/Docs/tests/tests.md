@@ -32,7 +32,7 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 + for databases:
   - works correctly if only one database is used; `01`
   - works correctly if several databases are used; `02`
-  - an error if empty string is used in databases; `03`
+  - an error if an empty string is used in databases; `03`
   - an error if a non-declared database is used; `04`
   - works correctly if some symbols in the names are in wrong register; `05`
 + for options:
@@ -43,11 +43,11 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
   - the value is valid only in single quotes; `14` `15`
   - an error if the value is not a bool; `16` `17`
 + for grouping:
-  - the value is valid only in quotes; `18` `19`
+  - the value is valid only in single quotes; `18` `19`
   - an error if sorting is missing; `20`
-  - an error if the value is not a set of field names enumeration, separeted by `,`; `21 - 24`
+  - an error if the value is not a set of field names enumeration, separeted by `,`; `21 - 24` `29` `30`
 + for sorting:
-  - the value is valid only in quotes; `25` `26`
+  - the value is valid only in single quotes; `25` `26`
   - an error if the value is not a field names enumeration; `27`
 + for format:
   - the value is valid only in quotes; `28`

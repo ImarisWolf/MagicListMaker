@@ -4,7 +4,7 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
+parseNotes = false
 smartRound = true
 handleMultiNames = 0
 sort = 'nameOracle'

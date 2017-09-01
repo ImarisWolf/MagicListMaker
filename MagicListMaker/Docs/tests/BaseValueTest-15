@@ -4,9 +4,8 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
-filter = !foil
-handleMultiNames = 'true'
+parseNotes = false
+filter = !$foil
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

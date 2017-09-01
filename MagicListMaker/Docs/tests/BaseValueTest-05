@@ -4,7 +4,7 @@ enddbs
 
 list
 dbs = 'Testdb'
-parseComments = false
+parseNotes = false
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

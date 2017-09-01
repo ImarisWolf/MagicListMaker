@@ -18,7 +18,7 @@ namespace MagicParser.CodeParsing
         
         private Dictionary<string, Database> dbs { get; set; } //Список баз данных по типу 'внутреннее имя БД' - 'ссылка на БД'
         public string errorDescription { get; private set; } //Сюда записывается описание ошибки; после вызова каждого метода обязательно нужно делать проверку, нет ли здесь информации, если есть - прекращать работу анализатора
-        public Dictionary<string, string> keyWords { get; set; } //Текстовые представления всех токенов-ключевых слов
+        public List<Token> tokens { get; set; }
         public static int tokenizerLastErrorPos = 0; //Последняя позиция токенайзера в случае, когда парсер вернул ошибку
         #endregion
 
@@ -29,33 +29,37 @@ namespace MagicParser.CodeParsing
             token = null;
             dbs = new Dictionary<string, Database>();
             errorDescription = null;
-            
-            keyWords = new Dictionary<string, string>();
-            keyWords.Add("declarationBeginToken", "dbs");
-            keyWords.Add("declarationEndToken", "enddbs");
-            keyWords.Add("listBeginToken", "list");
-            keyWords.Add("listEndToken", "endlist");
-            keyWords.Add("databasesToken", "dbs");
-            keyWords.Add("parseCommentsToken", "parseComments");
-            keyWords.Add("defaultDollarRateToken", "defaultDollarRate");
-            keyWords.Add("defaultDiscountToken", "defaultDiscount");
-            keyWords.Add("defaultGemMintDiscountToken", "defaultGemMintDiscount");
-            keyWords.Add("defaultMintDiscountToken", "defaultMintDiscount");
-            keyWords.Add("defaultNMMDiscountToken", "defaultNMMDiscount");
-            keyWords.Add("defaultNMDiscountToken", "defaultNMDiscount");
-            keyWords.Add("defaultNMSPDiscountToken", "defaultNMSPDiscount");
-            keyWords.Add("defaultSPDiscountToken", "defaultSPDiscount");
-            keyWords.Add("defaultSPMPDiscountToken", "defaultSPMPDiscount");
-            keyWords.Add("defaultMPDiscountToken", "defaultMPDiscount");
-            keyWords.Add("defaultMPHPDiscountToken", "defaultMPHPDiscount");
-            keyWords.Add("defaultHPDiscountToken", "defaultHPDiscount");
-            keyWords.Add("smartRoundToken", "smartRound");
-            keyWords.Add("roundToken", "round");
-            keyWords.Add("handleMultiNamesToken", "handleMultiNames");
-            keyWords.Add("filterToken", "filter");
-            keyWords.Add("groupingToken", "group");
-            keyWords.Add("sortingToken", "sort");
-            keyWords.Add("formattingToken", "format");
+
+            tokens = new List<Token>();
+
+            tokens.Add(new Token(Token.declarationBeginToken));
+            tokens.Add(new Token(Token.declarationEndToken));
+            tokens.Add(new Token(Token.listBeginToken));
+            tokens.Add(new Token(Token.listEndToken));
+
+            tokens.Add(new Token(Token.databasesToken));
+
+            tokens.Add(new Token(Token.parseNotesToken,             true, "bool",   typeof(Database).GetField("parseNotes")));
+            tokens.Add(new Token(Token.defaultDollarRateToken,      true, "number", typeof(Database).GetField("defaultDollarRate")));
+            tokens.Add(new Token(Token.defaultDiscountToken,        true, "number", typeof(Database).GetField("defaultDiscount")));
+            tokens.Add(new Token(Token.defaultGemMintDiscountToken, true, "number", typeof(Database).GetField("defaultGemMintDiscount")));
+            tokens.Add(new Token(Token.defaultMintDiscountToken,    true, "number", typeof(Database).GetField("defaultMintDiscount")));
+            tokens.Add(new Token(Token.defaultNMDiscountToken,      true, "number", typeof(Database).GetField("defaultNMMDiscount")));
+            tokens.Add(new Token(Token.defaultNMMDiscountToken,     true, "number", typeof(Database).GetField("defaultNMDiscount")));
+            tokens.Add(new Token(Token.defaultNMSPDiscountToken,    true, "number", typeof(Database).GetField("defaultNMSPDiscount")));
+            tokens.Add(new Token(Token.defaultSPDiscountToken,      true, "number", typeof(Database).GetField("defaultSPDiscount")));
+            tokens.Add(new Token(Token.defaultSPMPDiscountToken,    true, "number", typeof(Database).GetField("defaultSPMPDiscount")));
+            tokens.Add(new Token(Token.defaultMPDiscountToken,      true, "number", typeof(Database).GetField("defaultMPDiscount")));
+            tokens.Add(new Token(Token.defaultMPHPDiscountToken,    true, "number", typeof(Database).GetField("defaultMPHPDiscount")));
+            tokens.Add(new Token(Token.defaultHPDiscountToken,      true, "number", typeof(Database).GetField("defaultHPDiscount")));
+            tokens.Add(new Token(Token.smartRoundToken,             true, "bool",   typeof(Database).GetField("smartRound")));
+            tokens.Add(new Token(Token.roundToken,                  true, "number", typeof(Database).GetField("round")));
+            tokens.Add(new Token(Token.handleMultiNamesToken,       true, "bool",   typeof(Database).GetField("handleMultiNames")));
+
+            tokens.Add(new Token(Token.filterToken));
+            tokens.Add(new Token(Token.groupingToken));
+            tokens.Add(new Token(Token.sortingToken));
+            tokens.Add(new Token(Token.formattingToken));
         }
 
 
@@ -81,7 +85,7 @@ namespace MagicParser.CodeParsing
             if (token != "")
             {
                 if (token != "'") output = "Unexpected token: '" + token + "'.";
-                else output = "Unexpected token: \"" + token + "\" .";
+                else output = "Unexpected token: \"'\".";
             }
             else space = "";
 
@@ -112,18 +116,18 @@ namespace MagicParser.CodeParsing
             while (!t.endIsReached)
             {
                 //databasesDeclaration = declarationBeginToken declaration* declarationEndToken
-                if (GetNextToken(t).ToLower() == keyWords["declarationBeginToken"].ToLower())
+                if (GetNextToken(t).ToLower() == Token.declarationBeginToken.ToLower())
                 {
                     output += t.GetWhiteSpaces();
                     GetToken(t);
                     DBDeclarations(t);
                     if (errorDescription != null) { tokenizerLastErrorPos = t.pos; return output; }
                     GetToken(t);
-                    if (token.ToLower() != keyWords["declarationEndToken"].ToLower()) { errorDescription = ErrorExpected(keyWords["declarationEndToken"]); tokenizerLastErrorPos = t.pos; return output; }
+                    if (token.ToLower() != Token.declarationEndToken.ToLower()) { errorDescription = ErrorExpected(Token.declarationEndToken); tokenizerLastErrorPos = t.pos; return output; }
                     lastPos = t.pos;
                 }
                 //list = listBeginToken listParams listEndToken
-                else if (GetNextToken(t).ToLower() == keyWords["listBeginToken"].ToLower())
+                else if (GetNextToken(t).ToLower() == Token.listBeginToken.ToLower())
                 {
                     output += t.GetWhiteSpaces();
                     GetToken(t);
@@ -131,7 +135,7 @@ namespace MagicParser.CodeParsing
                     if (errorDescription != null) { tokenizerLastErrorPos = t.pos; return output; }
                     output += result;
                     GetToken(t);
-                    if (token.ToLower() != keyWords["listEndToken"].ToLower()) { errorDescription = ErrorExpected(keyWords["listEndToken"]); tokenizerLastErrorPos = t.pos; return output; }
+                    if (token.ToLower() != Token.listEndToken.ToLower()) { errorDescription = ErrorExpected(Token.listEndToken); tokenizerLastErrorPos = t.pos; return output; }
                     lastPos = t.pos;
                 }
                 //Иначе необходимо добавить весь текст (с пробелами) в аутпут
@@ -155,7 +159,7 @@ namespace MagicParser.CodeParsing
             do
             {
                 //name = ?regexp?
-                if (GetNextToken(t).ToLower() != keyWords["declarationEndToken"] && Regex.IsMatch(GetNextToken(t), @"^[a-zA-Z_]\w+$"))
+                if (GetNextToken(t).ToLower() != Token.declarationEndToken.ToLower() && Regex.IsMatch(GetNextToken(t), @"^[a-zA-Z_]\w+$"))
                 {
                     GetToken(t);
                     if (dbs.ContainsKey(token.ToLower()))
@@ -185,8 +189,8 @@ namespace MagicParser.CodeParsing
                     }
                     else { errorDescription = ErrorExpected("="); return; }
                 }
-                else if (GetNextToken(t).ToLower() == "") { GetToken(t); errorDescription = ErrorExpected(keyWords["declarationEndToken"]); return; }
-                else if (GetNextToken(t).ToLower() == keyWords["declarationEndToken"])
+                else if (GetNextToken(t).ToLower() == "") { GetToken(t); errorDescription = ErrorExpected(Token.declarationEndToken); return; }
+                else if (GetNextToken(t).ToLower() == Token.declarationEndToken.ToLower())
                 {
                     if (dbs.Count() == 0) errorDescription = "At least one Database should me declared!";
                     return;
@@ -202,7 +206,7 @@ namespace MagicParser.CodeParsing
             List<Database> currentDBs = new List<Database>();
             GetToken(t);
             //databases = databasesToken '=' "'" dbsValue "'"
-            if (token.ToLower() == keyWords["databasesToken"].ToLower())
+            if (token.ToLower() == Token.databasesToken.ToLower())
             {
                 GetToken(t);
                 if (token == "=")
@@ -210,6 +214,7 @@ namespace MagicParser.CodeParsing
                     GetToken(t);
                     if (token == "'")
                     {
+                        if (GetNextToken(t) == "'") { errorDescription = ErrorExpected("Databases names"); return ""; }
                         //dbsValue = name+
                         do
                         {
@@ -232,388 +237,31 @@ namespace MagicParser.CodeParsing
 
             //[options] [filter] [[grouping] sorting] [formatting]
             //options = option+
-            //option = parseComments | defaultDollarRate | defaultDiscount | smartRound | round | handleMultiNames
+            //option = boolOption | numberOption | stringOption
+            //boolOption = boolOptionToken '=' bool
+            //numberOption = numberOptionToken '=' number
+            //stringOption = stringOptionToken '=' "'" ?string? "'"
             List<string> usedOptions = new List<string>();
             while (true)
             {
-                //parseComments = parseCommentsToken '=' bool
-                if (GetNextToken(t).ToLower() == keyWords["parseCommentsToken"].ToLower())
+                bool noOptions = false;
+                foreach (Token key in tokens)
                 {
-                    if (!usedOptions.Contains(keyWords["parseCommentsToken"]))
+                    if (key.isOption && GetNextToken(t).ToLower() == key.name.ToLower())
                     {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
+                        noOptions = false;
+                        if (!usedOptions.Contains(key.name.ToLower()))
                         {
-                            GetToken(t);
-                            if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.notesAsIs = false;
-                            else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.notesAsIs = true;
-                            else { errorDescription = ErrorExpected("Bool value", false); return ""; }
+                            HandleOption(t, key, currentDBs);
+                            if (errorDescription != null) return "";
+                            usedOptions.Add(key.name.ToLower());
+                            break;
                         }
-                        else { errorDescription = ErrorExpected("="); return ""; }
+                        else { GetToken(t); errorDescription = "The option '" + token + "' has already been used"; return ""; }
                     }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["parseCommentsToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["parseCommentsToken"]);
-                    continue;
+                    else noOptions = true;
                 }
-
-                //defaultDollarRate = defaultDollarRateToken '=' ['-'] positiveNumber
-                if (GetNextToken(t).ToLower() == keyWords["defaultDollarRateToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultDollarRateToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float rate = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out rate)) foreach (Database db in currentDBs) db.defaultDollarRate = reverseOutput ? -rate : rate;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["defaultDollarRateToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultDollarRateToken"]);
-                    continue;
-                }
-
-                //defaultDiscount = defaultDiscountsToken '=' ['-'] positiveNumber ['%']
-                //defaultDiscountsToken = defaultDiscountToken | defaultGemMintDiscountToken | defaultMintDiscountToken | defaultNMMDiscountToken | defaultNMDiscountToken | defaultNMSPDiscountToken | defaultSPDiscountToken | defaultSPMPDiscountToken | defaultMPDiscountToken | defaultMPHPDiscountToken | defaultHPDiscountToken
-                if (GetNextToken(t).ToLower() == keyWords["defaultDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["defaultDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultGemMintDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultGemMintDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultGemMintDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultGemMintDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultGemMintDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultMintDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultMintDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMintDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultMintDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultMintDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultNMMDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultNMMDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMMDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultNMMDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultNMMDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultNMDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultNMDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMMDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultNMDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultNMMDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultNMSPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultNMSPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultNMSPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                        usedOptions.Add(keyWords["defaultNMSPDiscountToken"]);
-                        continue; 
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultNMSPDiscountToken"] + "' has already been used"; return ""; }
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultSPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultSPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultSPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                        usedOptions.Add(keyWords["defaultSPDiscountToken"]);
-                        continue;
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultSPDiscountToken"] + "' has already been used"; return ""; }
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultSPMPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultSPMPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultSPMPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                        usedOptions.Add(keyWords["defaultSPMPDiscountToken"]);
-                        continue; 
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultSPMPDiscountToken"] + "' has already been used"; return ""; }
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultMPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultMPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                        usedOptions.Add(keyWords["defaultMPDiscountToken"]);
-                        continue;
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultMPDiscountToken"] + "' has already been used"; return ""; }
-                    
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultMPHPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultMPHPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultMPHPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { GetToken(t); errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { errorDescription = "The option '" + keyWords["defaultMPHPDiscountToken"] + "' has already been used"; return ""; }
-                    
-                    usedOptions.Add(keyWords["defaultMPHPDiscountToken"]);
-                    continue;
-                }
-
-                if (GetNextToken(t).ToLower() == keyWords["defaultHPDiscountToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["defaultHPDiscountToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            bool reverseOutput = false;
-                            float discount = 0;
-                            if (token == "-") { reverseOutput = true; GetToken(t); }
-                            if (float.TryParse(token.Replace('.', ','), out discount)) foreach (Database db in currentDBs) db.defaultHPDiscount = reverseOutput ? -discount : discount;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["defaultHPDiscountToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["defaultHPDiscountToken"]);
-                    continue;
-                }
-
-                //smartRound = smartRoundToken '=' bool
-                if (GetNextToken(t).ToLower() == keyWords["smartRoundToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["smartRoundToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.smartRound = false;
-                            else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.smartRound = true;
-                            else { errorDescription = ErrorExpected("Bool value", false); return ""; }
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["smartRoundToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["smartRoundToken"]);
-                    continue;
-                }
-
-                //round = roundToken '=' positiveNumber
-                if (GetNextToken(t).ToLower() == keyWords["roundToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["roundToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            float round = 0;
-                            if (float.TryParse(token.Replace('.', ','), out round)) foreach (Database db in currentDBs) db.defaultHPDiscount = round;
-                            else { errorDescription = ErrorExpected("Number value", false); return ""; }
-
-                            if (GetNextToken(t) == "%") GetToken(t);
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["roundToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["roundToken"]);
-                    continue;
-                }
-
-                //handleMultiNames = handleMultiNamesToken '=' bool;
-                if (GetNextToken(t).ToLower() == keyWords["handleMultiNamesToken"].ToLower())
-                {
-                    if (!usedOptions.Contains(keyWords["handleMultiNamesToken"]))
-                    {
-                        GetToken(t);
-                        GetToken(t);
-                        if (token == "=")
-                        {
-                            GetToken(t);
-                            if (token.ToLower() == "true" || token == "1") foreach (Database db in currentDBs) db.handleMultiNames = false;
-                            else if (token.ToLower() == "false" || token == "0") foreach (Database db in currentDBs) db.handleMultiNames = true;
-                            else { errorDescription = ErrorExpected("Bool value", false); return ""; }
-                        }
-                        else { errorDescription = ErrorExpected("="); return ""; }
-                    }
-                    else { GetToken(t); errorDescription = "The option '" + keyWords["handleMultiNamesToken"] + "' has already been used"; return ""; }
-                    usedOptions.Add(keyWords["handleMultiNamesToken"]);
-                    continue;
-                }
-                
-                break;
+                if (noOptions) break;
             }
             
 
@@ -627,7 +275,7 @@ namespace MagicParser.CodeParsing
             Database mergedDB = Merge(currentDBs);
 
             //[filter]
-            if (GetNextToken(t).ToLower() == keyWords["filterToken"].ToLower())
+            if (GetNextToken(t).ToLower() == Token.filterToken.ToLower())
             {
                 Filter(t, mergedDB);
                 if (errorDescription != null) return "";
@@ -635,14 +283,15 @@ namespace MagicParser.CodeParsing
 
             //[grouping]
             List<List<string>> groupFields = new List<List<string>>();
-            if (GetNextToken(t).ToLower() == keyWords["groupingToken"].ToLower())
+            if (GetNextToken(t).ToLower() == Token.groupingToken.ToLower())
             {
                 groupFields = Group(t);
                 if (errorDescription != null) return "";
             }
 
             //[sorting]
-            if (GetNextToken(t).ToLower() == keyWords["sortingToken"].ToLower())
+            if (groupFields.Count != 0 && GetNextToken(t).ToLower() != Token.sortingToken.ToLower()) { GetToken(t); errorDescription = ErrorExpected(Token.sortingToken) + " If you set grouping, you must set sorting."; return ""; }
+            if (GetNextToken(t).ToLower() == Token.sortingToken.ToLower())
             {
                 if (groupFields.Count != 0) Sort(t, mergedDB, groupFields);
                 else Sort(t, mergedDB);
@@ -652,7 +301,7 @@ namespace MagicParser.CodeParsing
 
             //[formatting]
             string output = "";
-            if (GetNextToken(t).ToLower() == keyWords["formattingToken"].ToLower())
+            if (GetNextToken(t).ToLower() == Token.formattingToken.ToLower())
             {
                 output = Format(t, mergedDB);
                 if (errorDescription != null) return output;
@@ -661,11 +310,43 @@ namespace MagicParser.CodeParsing
             return output;
         }
 
+        private void HandleOption(Tokenizer t, Token key, List<Database> currentDBs)
+        {
+            GetToken(t);
+            GetToken(t);
+            if (token == "=")
+            {
+                GetToken(t);
+                if (key.optionType == "bool")
+                {
+                    bool value;
+
+                    if (token.ToLower() == "true" || token == "1") value = true;
+                    else if (token.ToLower() == "false" || token == "0") value = false;
+                    else { errorDescription = ErrorExpected("Bool value", false); return; }
+                    
+                    foreach (Database db in currentDBs) key.field.SetValue(db, value);
+                }
+                else if (key.optionType == "number")
+                {
+                    float value;
+                    if (!float.TryParse(token.Replace('.', ','), out value)) { errorDescription = ErrorExpected("Number value", false); return; }
+                    foreach (Database db in currentDBs) key.field.SetValue(db, value);
+                }
+                else if (key.optionType == "string")
+                {
+                    //There are no string options by now
+                }
+                else { errorDescription = "Wrong token type parameter; fix the code. The option is: " + token; }
+            }
+            else { errorDescription = ErrorExpected("="); return; }
+        }
+
         //filter = filterToken '=' "'" boolValue "'" ';'
         private void Filter(Tokenizer t, Database mergedDB)
         {
             GetToken(t);
-            if (token == keyWords["filterToken"])
+            if (token == Token.filterToken.ToLower())
             {
                 GetToken(t);
                 if (token == "=")
@@ -674,9 +355,10 @@ namespace MagicParser.CodeParsing
                     if (token == "'")
                     {
                         List<Entry> cardList = new List<Entry>(mergedDB.cardList);
+                        int pos = t.pos;
                         foreach (Entry card in cardList)
                         {
-                            Tokenizer T = new Tokenizer(t.input.Substring(t.pos));
+                            Tokenizer T = new Tokenizer(t.input.Substring(pos));
                             bool delete = !BoolValue(T, card);
                             if (errorDescription != null) return;
                             if (delete) mergedDB.cardList.Remove(card);
@@ -691,7 +373,7 @@ namespace MagicParser.CodeParsing
                 }
                 else { errorDescription = ErrorExpected("="); return; }
             }
-            else { errorDescription = ErrorExpected(keyWords["filterToken"]); return; }
+            else { errorDescription = ErrorExpected(Token.filterToken); return; }
 
 
         }
@@ -700,7 +382,7 @@ namespace MagicParser.CodeParsing
         private List<List<string>> Group(Tokenizer t)
         {
             GetToken(t);
-            if (token == keyWords["groupingToken"])
+            if (token == Token.groupingToken.ToLower())
             {
                 List<List<string>> groupFields = new List<List<string>>();
                 GetToken(t);
@@ -710,6 +392,7 @@ namespace MagicParser.CodeParsing
                     GetToken(t);
                     if (token == "'")
                     {
+                        if (GetNextToken(t) == "'") { errorDescription = ErrorExpected("Field name", false); return groupFields; }
                         //field+
                         //field = ?fieldName?
                         List<string> list = new List<string>();
@@ -751,14 +434,14 @@ namespace MagicParser.CodeParsing
                 else { errorDescription = ErrorExpected("="); return null; }
                 return groupFields;
             }
-            else { errorDescription = ErrorExpected(keyWords["groupingToken"]); return null; }
+            else { errorDescription = ErrorExpected(Token.groupingToken); return null; }
         }
 
         //sorting = sortingToken '=' "'" sortingValue "'"
         private void Sort(Tokenizer t, Database db, List<List<string>> groupFields = null)
         {
             GetToken(t);
-            if (token == keyWords["sortingToken"])
+            if (token == Token.sortingToken.ToLower())
             {
                 GetToken(t);
                 if (token == "=")
@@ -803,7 +486,7 @@ namespace MagicParser.CodeParsing
                 }
                 else { errorDescription = ErrorExpected("="); return; }
             }
-            else { errorDescription = ErrorExpected(keyWords["sortingToken"]); return; }
+            else { errorDescription = ErrorExpected(Token.sortingToken); return; }
         }
 
         //Выдаём айдишники для группировки отсортированному (!) списку карт. На вход подаётся список параметров группировки, каждый параметр является списком полей, по которым необходимо сгруппировать.
@@ -908,7 +591,7 @@ namespace MagicParser.CodeParsing
         private string Format(Tokenizer t, Database db)
         {
             GetToken(t);
-            if (token == keyWords["formattingToken"])
+            if (token == Token.formattingToken.ToLower())
             {
                 GetToken(t);
                 if (token == "=")
@@ -971,16 +654,14 @@ namespace MagicParser.CodeParsing
                                                     if (errorDescription != null)
                                                     {
                                                         tempT.SetPos(0);
-                                                        string stringErrorDescription = errorDescription;
                                                         errorDescription = null;
                                                         float numberResult = NumberFunction(tempT, card);
                                                         if (errorDescription != null)
                                                         {
                                                             tempT.SetPos(0);
-                                                            string numberErrorDescription = errorDescription;
                                                             errorDescription = null;
                                                             bool boolResult = BoolFunction(tempT, card);
-                                                            if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field name or another error.\r\nParsing as string ended with an error:\r\n" + stringErrorDescription + "\r\nParsing as number ended with an error:\r\n" + numberErrorDescription + "\r\nParsing as bool ended with an error:\r\n" + errorDescription; return output; }
+                                                            if (errorDescription != null) { errorDescription = "Parsing failed. That may be because of wrong field name or wrong function return type."; return output; }
                                                             else output += boolResult;
                                                         }
                                                         else output += numberResult;
@@ -1010,7 +691,7 @@ namespace MagicParser.CodeParsing
                 }
                 else { errorDescription = ErrorExpected("="); return ""; }
             }
-            else { errorDescription = ErrorExpected(keyWords["formattingToken"]); return ""; }
+            else { errorDescription = ErrorExpected(Token.formattingToken); return ""; }
         }
 
         
@@ -1025,16 +706,14 @@ namespace MagicParser.CodeParsing
             if (errorDescription != null)
             {
                 T.SetPos(0);
-                string boolErrorDescription = errorDescription;
                 errorDescription = null;
                 float numberResult = NumberValue(T, card);
                 if (errorDescription != null)
                 {
                     T.SetPos(0);
-                    string numberErrorDescription = errorDescription;
                     errorDescription = null;
                     string stringResult = StringValue(T, card);
-                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field name or another error.\r\nParsing as bool ended with an error:\r\n" + boolErrorDescription + "\r\nParsing as number ended with an error:\r\n" + numberErrorDescription + "\r\nParsing as string ended with an error:\r\n" + errorDescription; return new Tuple<string, bool, string, float>("error", false, null, 0); }
+                    if (errorDescription != null) { errorDescription = "Parsing failed. Check the synthax."; return new Tuple<string, bool, string, float>("error", false, null, 0); }
                     else output = new Tuple<string, bool, string, float>("string", false, stringResult, 0);
                 }
                 else output = new Tuple<string, bool, string, float>("number", false, null, numberResult);
@@ -1122,7 +801,6 @@ namespace MagicParser.CodeParsing
             else
             {
                 T.SetPos(0);
-                string boolErrorDescription = errorDescription;
                 errorDescription = null;
                 float numberLeft = NumberValue(T, card);
                 //если парсинг как сущность numberValue НЕ выдаёт ошибку - ищем дальше связки ('=' | '!=') numberValue. Должна быть хотя бы одна такая связка.
@@ -1152,7 +830,6 @@ namespace MagicParser.CodeParsing
                 else
                 {
                     T.SetPos(0);
-                    string numberErrorDescription = errorDescription;
                     errorDescription = null;
                     string stringLeft = StringValue(T, card);
                     //если парсинг как сущность stringValue НЕ выдаёт ошибку - ищем дальше связки ('=' | '!=') stringValue. Должна быть хотя бы одна такая связка.
@@ -1178,7 +855,7 @@ namespace MagicParser.CodeParsing
                         }
                         while (GetNextToken(T) == "=" || GetNextToken(T) == "!=");
                     }
-                    else { errorDescription = "Parsing failed.\r\nParsing as bool ended with an error:\r\n" + boolErrorDescription + "\r\nParsing as number ended with an error:\r\n" + numberErrorDescription + "\r\nParsing as string ended with an error:\r\n" + errorDescription; return output; }
+                    else { errorDescription = "Parsing failed. Check the synthax."; return output; }
                 }
             }
             t.SetPos(T.pos + t.input.Length - T.input.Length);
@@ -1195,7 +872,6 @@ namespace MagicParser.CodeParsing
             if (errorDescription != null)
             {
                 T.SetPos(0);
-                string boolValueErrorDescription = errorDescription;
                 errorDescription = null;
                 float numberLeft = NumberValue(T, card);
                 //если парсинг как сущность boolValue НЕ выдаёт ошибку - ищем дальше связки ('>' | '>=' | '<' | '<=') boolValue . Должна быть хотя бы одна такая связка.
@@ -1234,7 +910,7 @@ namespace MagicParser.CodeParsing
                     }
                     while (GetNextToken(T) == ">" || GetNextToken(T) == ">=" || GetNextToken(T) == "<" || GetNextToken(T) == "<=");
                 }
-                else { errorDescription = "Parsing failed.\r\nParsing as bool ended with an error:\r\n" + boolValueErrorDescription + "\r\nParsing as number ended with an error:\r\n" + errorDescription; return output; }
+                else { errorDescription = "Parsing failed. Check the synthax."; return output; }
             }
             //если парсинг как сущность boolArg НЕ выдаёт ошибку - возвращаем полученное значение
             t.SetPos(T.pos + t.input.Length - T.input.Length);
@@ -1246,7 +922,7 @@ namespace MagicParser.CodeParsing
         {
             bool reverseOutput = false;
             bool output;
-            if (GetNextToken(t) == "!") reverseOutput = true;
+            if (GetNextToken(t) == "!") { reverseOutput = true; GetToken(t); }
 
             if (GetNextToken(t) == "$")
             {
@@ -1401,7 +1077,7 @@ namespace MagicParser.CodeParsing
         {
             bool reverseOutput = false;
             float output;
-            if (GetNextToken(t) == "-") reverseOutput = true;
+            if (GetNextToken(t) == "-") { reverseOutput = true; GetToken(t); }
 
             if (GetNextToken(t) == "$")
             {
@@ -1761,79 +1437,79 @@ namespace MagicParser.CodeParsing
         #endregion
 
         //Разукрашиваем токены в кейворде
-        public void Paint(System.Windows.Forms.RichTextBox box)
-        {
-            int initPos = box.SelectionStart;
-            int initLength = box.SelectionLength;
-            box.SelectAll();
-            box.SelectionColor = Color.Black;
-            box.ForeColor = Color.Black;
-            Tokenizer t = new Tokenizer(input);
+        //public void Paint(System.Windows.Forms.RichTextBox box)
+        //{
+        //    int initPos = box.SelectionStart;
+        //    int initLength = box.SelectionLength;
+        //    box.SelectAll();
+        //    box.SelectionColor = Color.Black;
+        //    box.ForeColor = Color.Black;
+        //    Tokenizer t = new Tokenizer(input);
 
-            while (!t.endIsReached)
-            {
-                bool got = false;
-                GetToken(t);
-                foreach (KeyValuePair<string, string> pair in keyWords)
-                {
-                    if (token.ToLower() == pair.Value.ToLower())
-                    {
-                        got = true;
-                        if (Char.IsWhiteSpace(t.input[t.pos - 1])) { t.SetPos(t.pos - 1); }
-                        box.Select(t.pos - token.Length, token.Length);
-                        box.SelectionColor = Color.Blue;
-                    }
-                }
-                if (got) continue;
-                if (token == "\"")
-                {
-                    got = true;
-                    token = t.GetUntil('"');
-                    box.Select(t.pos - token.Length - 1, token.Length + 2);
-                    box.SelectionColor = Color.FromArgb(163, 21, 21);
-                    GetToken(t);
-                }
-                if (got) continue;
-                if (token == "$")
-                {
-                    got = true;
-                    GetToken(t);
-                    if (token == "(")
-                    {
-                        box.Select(t.pos - 2, 1);
-                        box.SelectionColor = Color.FromArgb(43, 145, 175);
-                    }
-                    else if (token.ToLower() == "if")
-                    {
-                        GetToken(t);
-                        if (token == "(")
-                        {
-                            box.Select(t.pos - 4, 3);
-                            box.SelectionColor = Color.FromArgb(43, 145, 175);
-                        }
-                    }
-                    else if (token.ToLower() == "contains")
-                    {
-                        box.Select(t.pos - 9, 9);
-                        box.SelectionColor = Color.FromArgb(43, 145, 175);
-                    }
-                    else if (token.ToLower() == "tostring")
-                    {
-                        box.Select(t.pos - 9, 9);
-                        box.SelectionColor = Color.FromArgb(43, 145, 175);
-                    }
-                    else if (token != "|" && token != "&" && token != "=" && token != "+" && token != "-" && token != "*" && token != "/" && token != ")" && token != "," && token != "$" && token != "!=" && token != ">" && token != "<" && token != ">=" && token != "<=" && token != "'" && token != "\"" && token != "")
-                    {
-                        if (Char.IsWhiteSpace(t.input[t.pos - 1])) { t.SetPos(t.pos - 1); }
-                        box.Select(t.pos - token.Length - 1, token.Length + 1);
-                        box.SelectionColor = Color.OrangeRed;
-                    }
-                }
-            }
-            box.SelectionStart = initPos;
-            box.SelectionLength = initLength;
-            box.SelectionColor = Color.Black;
-        }
+        //    while (!t.endIsReached)
+        //    {
+        //        bool got = false;
+        //        GetToken(t);
+        //        foreach (KeyValuePair<string, string> pair in keyWords)
+        //        {
+        //            if (token.ToLower() == pair.Value.ToLower())
+        //            {
+        //                got = true;
+        //                if (Char.IsWhiteSpace(t.input[t.pos - 1])) { t.SetPos(t.pos - 1); }
+        //                box.Select(t.pos - token.Length, token.Length);
+        //                box.SelectionColor = Color.Blue;
+        //            }
+        //        }
+        //        if (got) continue;
+        //        if (token == "\"")
+        //        {
+        //            got = true;
+        //            token = t.GetUntil('"');
+        //            box.Select(t.pos - token.Length - 1, token.Length + 2);
+        //            box.SelectionColor = Color.FromArgb(163, 21, 21);
+        //            GetToken(t);
+        //        }
+        //        if (got) continue;
+        //        if (token == "$")
+        //        {
+        //            got = true;
+        //            GetToken(t);
+        //            if (token == "(")
+        //            {
+        //                box.Select(t.pos - 2, 1);
+        //                box.SelectionColor = Color.FromArgb(43, 145, 175);
+        //            }
+        //            else if (token.ToLower() == "if")
+        //            {
+        //                GetToken(t);
+        //                if (token == "(")
+        //                {
+        //                    box.Select(t.pos - 4, 3);
+        //                    box.SelectionColor = Color.FromArgb(43, 145, 175);
+        //                }
+        //            }
+        //            else if (token.ToLower() == "contains")
+        //            {
+        //                box.Select(t.pos - 9, 9);
+        //                box.SelectionColor = Color.FromArgb(43, 145, 175);
+        //            }
+        //            else if (token.ToLower() == "tostring")
+        //            {
+        //                box.Select(t.pos - 9, 9);
+        //                box.SelectionColor = Color.FromArgb(43, 145, 175);
+        //            }
+        //            else if (token != "|" && token != "&" && token != "=" && token != "+" && token != "-" && token != "*" && token != "/" && token != ")" && token != "," && token != "$" && token != "!=" && token != ">" && token != "<" && token != ">=" && token != "<=" && token != "'" && token != "\"" && token != "")
+        //            {
+        //                if (Char.IsWhiteSpace(t.input[t.pos - 1])) { t.SetPos(t.pos - 1); }
+        //                box.Select(t.pos - token.Length - 1, token.Length + 1);
+        //                box.SelectionColor = Color.OrangeRed;
+        //            }
+        //        }
+        //    }
+        //    box.SelectionStart = initPos;
+        //    box.SelectionLength = initLength;
+        //    box.SelectionColor = Color.Black;
+        //}
 
     }
 }

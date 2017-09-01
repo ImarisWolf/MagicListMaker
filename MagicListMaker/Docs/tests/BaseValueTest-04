@@ -3,8 +3,8 @@ testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\M
 enddbs
 
 list
-dbs = 'non-declaredDB'
-parseComments = false
+dbs = 'nondeclaredDB'
+parseNotes = false
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

@@ -4,9 +4,8 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
-defaultDollarRate = '45.00';
-handleMultiNames = 'true'
+parseNotes = false
+defaultDollarRate = '45.00'
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeParsing\Analizer.cs" />
+    <Compile Include="CodeParsing\Token.cs" />
     <Compile Include="CodeParsing\Tokenizer.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="MainWindow.cs">

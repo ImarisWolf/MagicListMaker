@@ -8,7 +8,7 @@ enddbs
 
 list
 dbs = 'testDB1 testDB2 testDB3'
-parseComments = false
+parseNotes = false
 sort = 'nameOracle'
 format = '$qty $nameOracle $language'
 endlist

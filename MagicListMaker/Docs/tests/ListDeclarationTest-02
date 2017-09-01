@@ -3,7 +3,7 @@ testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\M
 enddbs
 
 list
-parseComments = false
+parseNotes = false
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

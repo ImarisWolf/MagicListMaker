@@ -4,9 +4,8 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
-handleMultiNames = 'true'
-grouping = 'nameOracle set, nameOracle language'
+parseNotes = false
+group = 'nameOracle set, nameOracle language'
 sort = 'nameOracle'
 format = '$qty $nameOracle'
 endlist

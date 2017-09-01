@@ -4,7 +4,7 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
+parseNotes = false
 sort = 'cost'
 format = '$cost'
 endlist

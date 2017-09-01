@@ -4,7 +4,7 @@ enddbs
 
 list
 dbs = 'testDB'
-parseComments = false
+parseNotes = false
 defaultDollarRate = 30
 defaultSPDiscount = 20
 smartRound = true

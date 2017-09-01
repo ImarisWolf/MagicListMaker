@@ -14,21 +14,21 @@ namespace MagicParser
     public class Database //является выгрузкой одного конкретного файла txt
     {
         public string fileName { get; set; } //Путь к файлу, из которого берётся выгрузка базы
-        public bool notesAsIs { get; set; } //Если указан этот параметр, то при считывании базы комментарии не будут парситься особым образом
-        public float defaultDollarRate { get; set; } //курс доллара, применяемый ко всем картам базы
-        public float defaultDiscount { get; set; } //скидка (или наценка), применяемая ко всем картам базы
-        public float defaultGemMintDiscount { get; set; }
-        public float defaultMintDiscount { get; set; }
-        public float defaultNMMDiscount { get; set; }
-        public float defaultNMDiscount { get; set; }
-        public float defaultNMSPDiscount { get; set; }
-        public float defaultSPDiscount { get; set; }
-        public float defaultSPMPDiscount { get; set; }
-        public float defaultMPDiscount { get; set; }
-        public float defaultMPHPDiscount { get; set; }
-        public float defaultHPDiscount { get; set; }
-        public bool smartRound { get; set; }
-        public int round { get; set; }
+        public bool parseNotes;  //Если указан этот параметр, то при считывании базы комментарии не будут парситься особым образом
+        public float defaultDollarRate; //курс доллара, применяемый ко всем картам базы
+        public float defaultDiscount;  //скидка (или наценка), применяемая ко всем картам базы
+        public float defaultGemMintDiscount;
+        public float defaultMintDiscount;
+        public float defaultNMMDiscount;
+        public float defaultNMDiscount;
+        public float defaultNMSPDiscount;
+        public float defaultSPDiscount;
+        public float defaultSPMPDiscount;
+        public float defaultMPDiscount;
+        public float defaultMPHPDiscount;
+        public float defaultHPDiscount;
+        public bool smartRound;
+        public float round;
         public bool handleMultiNames;
         public static string token; //Текущий токен при парсинге с токенайзером
         public string errorDescription;
@@ -198,7 +198,7 @@ namespace MagicParser
             {
                 this.fileName = fileName;
             }
-            notesAsIs = false;
+            parseNotes = true;
             defaultDollarRate = 40;
             defaultDiscount = 0;
             defaultGemMintDiscount = 0;
@@ -505,8 +505,8 @@ namespace MagicParser
         
         private void ParseEntry(Entry entry)
         {
-            //если есть notes и не стоит флаг 'парсить как есть', то парсим по заметке
-            if (!String.IsNullOrEmpty(entry.notes) && !notesAsIs)
+            //если есть notes и стоит флаг 'парсить по заметке', то парсим по заметке
+            if (!String.IsNullOrEmpty(entry.notes) && parseNotes)
             {
                 ParseNote(entry);
                 if (errorDescription != null) return;
