@@ -1,0 +1,9 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\freakNames.txt'
+enddbs
+
+list
+dbs = 'testDB'
+handleMultiNames = true
+format = '$nameOracle'
+endlist

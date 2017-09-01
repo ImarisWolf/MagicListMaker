@@ -131,9 +131,9 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 
 ### Other options testings
 **Check:**
-+ handleMultiNames works according to default if the handleMultiNames option isn't set;
-+ works correctly when handleMultiNames is on;
++ works correctly when handleMultiNames is on; `01`
 + works correctly when handleMultiNames is off;
++ handleMultiNames works according to default if the handleMultiNames option isn't set; `03`
 
 ### Sorting and grouping testings
 **Check:**
