@@ -18,5 +18,6 @@ note = [parameter] ((',' | ';') parameter)* ['.'];
         discount = ('d' ?number?) | (?number? '%');
         comment = '"' ?anyText? '"';
         priority = 'p' ?number?;
-        field = '$' ?fieldName?;
+        field = '$' ?fieldName? '=' fieldValue;
+            fieldValue = ?bool? | ?integer? | ?number? | '"' ?string? '"';
         grade = ('M' | 'Mint' | 'NM' | 'SP' | 'MP' | 'HP') ?anyText?;

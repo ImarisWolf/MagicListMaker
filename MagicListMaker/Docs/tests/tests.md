@@ -82,38 +82,39 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 
 ### Note parsing testings
 **Check:**
-+ works according to default if the parseComments option isn't set;
-+ for `parseComments = false`, `parseComments = true` and a note was parsed, and `parseComments = true` and no note was parsed, check the following:
-  - for every-field-export and for one-field-export:
-    * every Magic Album field is written in appropriate card field;
-    * `comments` field contains `note` field info without changes;
-    * no field contains a null value;
-+ for `parseComments = false`:
-  - it separates foil and non-foil as usual;
-+ for `parseComments = true`:
-  - parse works with `,` and `;`;
-  - parse works with `.` in the end;
-  - works correctly when a parameter has a string like "NM/M with a stamp";
-  - comments works correctly;
-  - for discount:
++ works according to default if the parseNotes option isn't set; `01`
++ for `parseNotes = false` (`a`), `parseNotes = true` and a note was parsed (`b`), and `parseNotes = true` and no note was parsed (`c`), check the following:
+  - for every-field-export (`every`) and for one-field-export (`one`):
+    * every Magic Album field is written in appropriate card field; `02`
+    * no field contains a null value; `02`
++ for `parseNotes = false`:
+  - it separates foil and non-foil as usual; `03`
+  - `comments` field contains `note` field info without changes; `04`
++ for `parseNotes = true`:
+  - parse works with `,` and `;`; `05`
+  - parse works with `.` in the end; `06`
+  - works correctly when a parameter has a string like "NM/M with a stamp"; `07`
+  - comments works correctly; `08`
+  - for discount: `09`
     * `d10`, `d200` works correctly;
     * `10%`, `200%` works correctly;
     * `d-10`, `d-200` works correctly;
     * `-10%`, `-200%` works correctly;
   - for dollar rate:
-    * `r50` works correctly;
-    * `r0.30` works correctly;
-    * an error for `r-50` or `r-0.30`;
-  - any-field parameter works correctly;
-  - several any-field parameters work correctly;
-  - language parameter works correctly;
-  - positive price works correctly;
-  - an error when trying to set a negative price;
-  - a parameter with all the options in any order works correctly;
-  - an error for unexpected parameters;
-  - it works correctly when parsing different types of parameters declared in any order;
-  - an error if sum of qtys in parameters is bigger than qty of cards;
-  - works correctly if sum of qtys in parameters is equal to qty of cards;
+    * `r50` works correctly; `10`
+    * `r0.30` works correctly; `10`
+    * an error for `r-50` or `r-0.30`; `11` `12`
+  - any-field parameter works correctly; `13` - `16`
+  - several any-field parameters work correctly; `17`
+  - language parameter works correctly; `18` `19`
+  - positive price works correctly; `20` `21`
+  - an error when trying to set a negative price; `22`
+  - priority works correctly; `23`
+  - a parameter with all the options in any order works correctly; `24`
+  - an error for unexpected parameters; `25`
+  - it works correctly when parsing different types of parameters declared in any order; `26`
+  - an error if sum of qtys in parameters is bigger than qty of cards; `27`
+  - works correctly if sum of qtys in parameters is equal to qty of cards; `28`
 
 ### Price and round testings
 **Check:**

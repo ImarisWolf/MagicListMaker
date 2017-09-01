@@ -1,0 +1,10 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\note-07.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+sort = 'nameOracle'
+format = '$qty $nameOracle - $if($foil, "FOIL", "NON-FOIL") - $grade'
+endlist

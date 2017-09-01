@@ -155,8 +155,8 @@ namespace MagicParser
             public string comment;
             public float discount;
             public float dollarRate;
-            public FieldInfo field;
-            public string fieldValue;
+            public List<FieldInfo> fields;
+            public List<string> fieldValues;
             public string grade;
             public string language;
             public float price;
@@ -176,8 +176,8 @@ namespace MagicParser
                 comment = "";
                 discount = 0;
                 dollarRate = 0;
-                field = null;
-                fieldValue = "";
+                fields = new List<FieldInfo>();
+                fieldValues = new List<string>();
                 grade = entry.grade;
                 language = entry.language;
                 price = 0;
@@ -503,6 +503,7 @@ namespace MagicParser
                 }
                 //парсим полученную запись дальше на несколько записей с разными свойствами - в этом же методе они добавятся в cardList
                 ParseEntry(entry);
+                if (errorDescription != null) { return; }
                 //читаем следующую строку
                 currentLine = sr.ReadLine();
             }
@@ -546,7 +547,22 @@ namespace MagicParser
                 if (Int32.TryParse(token.Replace('.', ','), out par.qty)) { GetToken(t); }
                 //[type]
                 if (token.ToLower() == "foil") { GetToken(t); par.type = "foil"; }
-                else if (token.ToLower() == "nonfoil" || token.ToLower() == "non-foil") { GetToken(t); par.type = "non-foil"; }
+                else if (token.ToLower() == "nonfoil") { GetToken(t); par.type = "non-foil"; }
+                else if (token.ToLower() == "non")
+                {
+                    GetToken(t);
+                    if (token == "-")
+                    {
+                        GetToken(t);
+                        if (token == "foil")
+                        {
+                            GetToken(t);
+                            par.type = "non-foil";
+                        }
+                        else { errorDescription = ErrorExpected(); return; }
+                    }
+                    else { errorDescription = ErrorExpected(); return; }
+                }
 
                 //property = price | language | dollarRate | discount | comment | priority | field | grade;
                 bool continueParseGrade = false;
@@ -568,6 +584,7 @@ namespace MagicParser
                             token = t.GetUntil('"');
                             par.comment = token;
                             GetToken(t);
+                            GetToken(t);
                             continueParseGrade = false;
                         }
                         //discount = ('d' ?number?) | (?number? '%');
@@ -583,10 +600,22 @@ namespace MagicParser
                                     par.discount = -par.discount;
                                     GetToken(t);
                                 }
-                                else { errorDescription = ErrorExpected(); return; }
+                                else { errorDescription = "Wrong parameter: d-" + token + ". Check your Magic Album file."; return; }
                             }
-                            else { errorDescription = ErrorExpected(); return; }
+                            else { errorDescription = "Wrong parameter: d" + token + ". Check your Magic Album file."; return; }
                             continueParseGrade = false;
+                        }
+                        else if (token == "-")
+                        {
+                            GetToken(t);
+                            if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
+                            {
+                                float.TryParse(token.Substring(0, token.Length - 1).Replace('.', ','), out par.discount);
+                                par.discount = -par.discount;
+                                GetToken(t);
+                                continueParseGrade = false;
+                            }
+                            else { errorDescription = ErrorExpected() + " Check your Magic Album file."; return; }
                         }
                         else if (Regex.IsMatch(token, @"^(?i)d\d+(\.\d+)?(?-i)$"))
                         {
@@ -596,7 +625,8 @@ namespace MagicParser
                         }
                         else if (Regex.IsMatch(token, @"^(?i)\d+(\.\d+)?(?-i)%$"))
                         {
-                            float.TryParse(token.Substring(0, token.Length - 2).Replace('.', ','), out par.discount);
+                            float.TryParse(token.Substring(0, token.Length - 1).Replace('.', ','), out par.discount);
+                            GetToken(t);
                             continueParseGrade = false;
                         }
                         //dollarRate = ('c' | 'r')  ?number?;
@@ -612,14 +642,19 @@ namespace MagicParser
                             GetToken(t);
                             //Проверяем существование поля с таким названием
                             FieldInfo field = typeof(Entry).GetField(token, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                            par.field = field;
+                            par.fields.Add(field);
                             if (field != null)
                             {
                                 GetToken(t);
                                 if (token == "=")
                                 {
                                     GetToken(t);
-                                    par.fieldValue = token;
+                                    if (token == "\"")
+                                    {
+                                        token = t.GetUntil('"');
+                                    }
+                                    par.fieldValues.Add(token);
+                                    GetToken(t);
                                     GetToken(t);
                                 }
                                 else { errorDescription = ErrorExpected("="); return; }
@@ -688,7 +723,13 @@ namespace MagicParser
                 if (par.type == "foil") qtyF += par.qty;
                 else if (par.type == "non-foil" || par.type.ToLower() == "") qtyR += par.qty;
             }
-            if (qtyF > entry.qtyF || qtyR > entry.qtyR) { errorDescription = "Wrong cards quantity. Check your Magic Album file."; return; }
+            if (qtyF > entry.qtyF || qtyR > entry.qtyR)
+            {
+                errorDescription = "Wrong cards quantity. Check your Magic Album file.";
+                if (entry.nameOracle != "") errorDescription += " Card Oracle name: " + entry.nameOracle + ".";
+                if (entry.set != "") errorDescription += " Card set: " + entry.set + ".";
+                return;
+            }
 
             /*
              * Если количество и типа отсутствуют - параметр применяется ко всем картам.
@@ -712,18 +753,17 @@ namespace MagicParser
             {
                 if (par.qty == 0 && (par.type == "non-foil"))
                 {
+                    nonFoilEntry.foil = false;
                     SetParameters(nonFoilEntry, par);
                     if (errorDescription != null) return;
-
-                    nonFoilEntry.foil = false;
                     nonFoilEntry.grade = nonFoilEntry.gradeR;
                     nonFoilEntry.price = nonFoilEntry.priceR;
                 }
                 else if (par.qty == 0 && par.type == "foil")
                 {
+                    foilEntry.foil = true;
                     SetParameters(foilEntry, par);
                     if (errorDescription != null) return;
-                    foilEntry.foil = true;
                     nonFoilEntry.grade = nonFoilEntry.gradeF;
                     nonFoilEntry.price = nonFoilEntry.priceF;
                 }
@@ -737,9 +777,9 @@ namespace MagicParser
                     Entry newEntry = new Entry(nonFoilEntry);
                     newEntry.qty = par.qty;
                     entry.qtyR -= par.qty; //Уменьшаем счётчик
+                    newEntry.foil = false;
                     SetParameters(newEntry, par);
                     if (errorDescription != null) return;
-                    newEntry.foil = false;
                     newEntry.grade = newEntry.gradeR;
                     newEntry.price = newEntry.sellPrice;
                     cardList.Add(newEntry);
@@ -749,9 +789,9 @@ namespace MagicParser
                     Entry newEntry = new Entry(foilEntry);
                     newEntry.qty = par.qty;
                     entry.qtyF -= par.qty; //Уменьшаем счётчик
+                    newEntry.foil = true;
                     SetParameters(newEntry, par);
                     if (errorDescription != null) return;
-                    newEntry.foil = true;
                     newEntry.grade = newEntry.gradeF;
                     newEntry.price = newEntry.buyPrice;
                     cardList.Add(newEntry);
@@ -771,6 +811,7 @@ namespace MagicParser
                 foilEntry.qty = entry.qtyF;
                 foilEntry.grade = foilEntry.gradeF;
                 foilEntry.price = foilEntry.buyPrice;
+                foilEntry.foil = true;
                 cardList.Add(foilEntry);
             }
         }
@@ -787,33 +828,36 @@ namespace MagicParser
             entry.discount = par.discount;
             entry.comment = par.comment;
             entry.priority = par.priority;
-            if (par.field != null)
+            if (par.fields.Count != 0)
             {
-                if (par.field.GetValue(entry).GetType() == typeof(bool))
+                for (int i = 0; i < par.fields.Count; i++)
                 {
-                    bool val;
-                    if (par.fieldValue.ToLower() == "true" || par.fieldValue.ToLower() == "1") val = true;
-                    else if (par.fieldValue.ToLower() == "false" || par.fieldValue.ToLower() == "0") val = false;
-                    else { errorDescription = "Failed to parse the value to bool: " + token + ". Check your Magic Album file."; return; }
-                    par.field.SetValue(entry, val);
+                    if (par.fields[i].GetValue(entry).GetType() == typeof(bool))
+                    {
+                        bool val;
+                        if (par.fieldValues[i].ToLower() == "true" || par.fieldValues[i].ToLower() == "1") val = true;
+                        else if (par.fieldValues[i].ToLower() == "false" || par.fieldValues[i].ToLower() == "0") val = false;
+                        else { errorDescription = "Failed to parse the value to bool: " + par.fieldValues[i] + ". Check your Magic Album file."; return; }
+                        par.fields[i].SetValue(entry, val);
+                    }
+                    else if (par.fields[i].GetValue(entry).GetType() == typeof(int))
+                    {
+                        int val;
+                        if (Int32.TryParse(par.fieldValues[i], out val)) par.fields[i].SetValue(entry, val);
+                        else { errorDescription = "Failed to parse the value to int: " + par.fieldValues[i] + ". Check your Magic Album file."; return; }
+                    }
+                    else if (par.fields[i].GetValue(entry).GetType() == typeof(float))
+                    {
+                        float val;
+                        if (float.TryParse(par.fieldValues[i].Replace('.', ','), out val)) par.fields[i].SetValue(entry, val);
+                        else { errorDescription = "Failed to parse the value to float: " + par.fieldValues[i] + ". Check your Magic Album file."; return; }
+                    }
+                    else if (par.fields[i].GetValue(entry).GetType() == typeof(string))
+                    {
+                        par.fields[i].SetValue(entry, par.fieldValues[i]);
+                    }
+                    else { errorDescription = "Very strange error: wrong typeof() in sorting. You should debug it. Also, check your Magic Album file."; return; }
                 }
-                else if (par.field.GetValue(entry).GetType() == typeof(int))
-                {
-                    int val;
-                    if (Int32.TryParse(par.fieldValue, out val)) par.field.SetValue(entry, val);
-                    else { errorDescription = "Failed to parse the value to int: " + token + ". Check your Magic Album file."; return; }
-                }
-                else if (par.field.GetValue(entry).GetType() == typeof(float))
-                {
-                    float val;
-                    if (float.TryParse(par.fieldValue, out val)) par.field.SetValue(entry, val);
-                    else { errorDescription = "Failed to parse the value to float: " + token + ". Check your Magic Album file."; return; }
-                }
-                else if (par.field.GetValue(entry).GetType() == typeof(string))
-                {
-                    par.field.SetValue(entry, par.fieldValue);
-                }
-                else { errorDescription = "Very strange error: wrong typeof() in sorting. You should debug it. Also, check your Magic Album file."; return; }
             }
         }
         
@@ -824,17 +868,17 @@ namespace MagicParser
             nonFoilEntry.qty = entry.qtyR;
             nonFoilEntry.grade = entry.gradeR;
             nonFoilEntry.price = entry.sellPrice;
-            nonFoilEntry.comment = nonFoilEntry.notes;
+            nonFoilEntry.comment = entry.notes;
             nonFoilEntry.notes = "";
             cardList.Add(nonFoilEntry);
 
-            Entry foilEntry = new Entry();
+            Entry foilEntry = new Entry(entry);
             foilEntry = entry;
             foilEntry.foil = true;
             foilEntry.qty = entry.qtyF;
             foilEntry.grade = entry.gradeF;
             foilEntry.price = entry.buyPrice;
-            foilEntry.comment = nonFoilEntry.notes;
+            foilEntry.comment = entry.notes;
             foilEntry.notes = "";
             cardList.Add(foilEntry);
         }

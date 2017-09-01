@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\note-09.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+smartRound = false
+sort = 'nameOracle'
+format = '$qty $nameOracle - $("$")$originalPrice, $price руб.'
+endlist

@@ -1,0 +1,64 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\note-02.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+sort = 'nameOracle'
+
+format = 'Default fields:
+artist: "$artist"
+border: "$border"
+buyQty: "$buyQty"
+color: "$color"
+copyright: "$copyright"
+cost: "$cost"
+language: "$language"
+legality: "$legality"
+name: "$name"
+nameOracle: "$nameOracle"
+notes: "$notes"
+number: "$number"
+pt: "$pt"
+priceF: "$priceF"
+priceR: "$priceR"
+proxies: "$proxies"
+rarity: "$rarity"
+rating: "$rating"
+sellQty: "$sellQty"
+set: "$set"
+text: "$text"
+textOracle: "$textOracle"
+type: "$type"
+typeOracle: "$typeOracle"
+used: "$used"
+version: "$version"
+
+New fields:
+qty: "$qty"
+foil: "$foil"
+dollarRate: "$dollarRate"
+discount: "$discount"
+comment: "$comment"
+grade: "$grade"
+originalPrice: "$originalPrice"
+price: "$price"
+priority: "$priority"
+
+Service fields:
+groupID: "$groupID"
+
+Useless fields:
+buyPrice: "$buyPrice"
+sellPrice: "$sellPrice"
+gradeF: "$gradeF"
+gradeR: "$gradeR"
+qtyF: "$qtyF"
+qtyR: "$qtyR"
+
+=========================
+
+
+.'
+endlist
