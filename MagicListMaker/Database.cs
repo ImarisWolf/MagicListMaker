@@ -198,6 +198,13 @@ namespace MagicParser
             {
                 this.fileName = fileName;
             }
+            Clear();
+        }
+
+        #region General methods
+
+        public void Clear()
+        {
             parseNotes = true;
             defaultDollarRate = 40;
             defaultDiscount = 0;
@@ -216,8 +223,6 @@ namespace MagicParser
             handleMultiNames = true;
             cardList = new List<Entry>();
         }
-
-        #region General methods
 
         private void GetToken(Tokenizer t)
         {
