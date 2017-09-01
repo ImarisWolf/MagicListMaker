@@ -223,6 +223,7 @@ namespace MagicParser.CodeParsing
                             GetToken(t);
                             if (dbs.ContainsKey(token.ToLower()))
                             {
+                                dbs[token.ToLower()].Clear();
                                 currentDBs.Add(dbs[token.ToLower()]);
                             }
                             else { errorDescription = "Database with the name '" + token + "' doesn't exist. Declare it first."; return ""; }
