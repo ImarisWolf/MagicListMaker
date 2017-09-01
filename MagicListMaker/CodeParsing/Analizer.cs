@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -179,6 +180,7 @@ namespace MagicParser.CodeParsing
                             if (Regex.IsMatch(token, @"^(?i)([a-z]+:)?[\\/]?([\\/].*)*[\\/]?(?-i)$"))
                             {
                                 string DBpath = token;
+                                if (!File.Exists(DBpath)) { errorDescription = "The file '" + DBpath + "' doesn't exist."; return; }
                                 dbs.Add(DBname, new Database(DBpath));
                                 GetToken(t);
                                 if (token != "'") { errorDescription = ErrorQuotes("declare the path"); return; }
