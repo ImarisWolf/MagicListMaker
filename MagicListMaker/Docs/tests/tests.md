@@ -25,6 +25,7 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 + an error if one option is declared several times; `06`
 + works correctly if declaration has one database; `04`
 + works correctly if declaration has several databases; `07`
++ works correctly if there are several list declarations; `08`
 + list base synthax works correctly, and the program responds an error if there is a base synthax error;
 
 ### Base value testings
