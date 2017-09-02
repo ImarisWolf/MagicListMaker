@@ -7,5 +7,5 @@ dbs = 'testDB'
 parseNotes = true
 filter = 'true'
 sort = 'nameOracle'
-format = '"$if($contains("this", "th"), "ok!" + "Very good.")" "$if($contains("this", "that"), "you shouldn't see this" + "o_o")"'
+format = '"$if($contains("this", "th"), "ok!" + " Very good.")" "$if($contains("this", "that"), "you shouldn't see this" + "o_o")"'
 endlist

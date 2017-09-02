@@ -5,5 +5,5 @@ enddbs
 list
 dbs = 'testDB'
 sort = 'nameOracle'
-format = '$qty $nameOracle - $price ($set, $language $if($language != "eng", $name), $grade)'
+format = '$qty $nameOracle - ($set, $language $if($language != "eng", $name), $grade)'
 endlist

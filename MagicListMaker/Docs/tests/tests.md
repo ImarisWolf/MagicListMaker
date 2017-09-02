@@ -51,7 +51,7 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
   - the value is valid only in single quotes; `25` `26`
   - an error if the value is not a field names enumeration; `27`
 + for format:
-  - the value is valid only in quotes; `28`
+  - the value is valid only in single quotes; `28`
 
 ## II. Functioning testings
 
@@ -59,7 +59,7 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 **Check:**
 + an error if the file doesn't exist; `01`
 + an error if the path doesn't exist; `02`
-+ if the file and path exist, but the file path is unusual:
++ if the file and the path exist, but the file path is unusual:
   - works correctly with both `/` and `\` symbols; `03`
   - works correctly with double `/` or `\` symbol after drive letter; `04` `05`
   - works correctly with multi-letter drives; `missing`

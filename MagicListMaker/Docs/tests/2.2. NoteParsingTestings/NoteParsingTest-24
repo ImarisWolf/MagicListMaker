@@ -8,16 +8,19 @@ parseNotes = true
 sort = 'nameOracle'
 
 format = '$qty $nameOracle
-language: "$language"
+
 notes: "$notes"
-set: "$set"
+
+originalPrice: "$originalPrice"
+language: "$language"
 dollarRate: "$dollarRate"
 discount: "$discount"
 comment: "$comment"
-grade: "$grade"
-originalPrice: "$originalPrice"
-price: "$price"
 priority: "$priority"
+set: "$set"
+grade: "$grade"
+
+price: "$price"
 
 
 ====================

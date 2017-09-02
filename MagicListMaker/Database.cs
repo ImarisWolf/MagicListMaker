@@ -653,9 +653,11 @@ namespace MagicParser
                                     if (token == "\"")
                                     {
                                         token = t.GetUntil('"');
+                                        par.fieldValues.Add(token);
+                                        GetToken(t);
                                     }
-                                    par.fieldValues.Add(token);
-                                    GetToken(t);
+                                    else par.fieldValues.Add(token);
+
                                     GetToken(t);
                                 }
                                 else { errorDescription = ErrorExpected("="); return; }

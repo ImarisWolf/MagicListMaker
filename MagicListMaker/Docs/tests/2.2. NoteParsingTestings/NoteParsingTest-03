@@ -6,5 +6,5 @@ list
 dbs = 'testDB'
 parseNotes = false
 sort = 'nameOracle'
-format = '$qty $nameOracle - $if($foil, "FOIL", "NON-FOIL"))'
+format = '$qty $nameOracle - $if($foil, "FOIL", "NON-FOIL")'
 endlist
