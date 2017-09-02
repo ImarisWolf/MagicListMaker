@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = '!true'
+sort = 'nameOracle'
+format = '$(!false)'
+endlist

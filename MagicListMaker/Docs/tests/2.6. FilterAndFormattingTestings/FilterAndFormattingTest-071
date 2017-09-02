@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = '(false | true) = $foil = true'
+sort = 'nameOracle'
+format = '$(4>=2 = $contains("a", "a") = (1=2))'
+endlist

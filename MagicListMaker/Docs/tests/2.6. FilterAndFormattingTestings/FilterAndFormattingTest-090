@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = 'true'
+sort = 'nameOracle'
+format = '$if(56 > 48 & 112 <= 184, 90.2/90.2) $if(!(78 > 89 | true), 90.2/90.2)'
+endlist

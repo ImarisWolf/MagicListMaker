@@ -39,7 +39,7 @@ value = boolValue | numberValue | stringValue;
         or = and (('|') and)*;
             and = equality (('&') equality)*;
                 equality = (comparsion (('=' | '!=') comparsion)*) | (numberValue (('=' | '!=') numberValue)+) | (stringValue (('=' | '!=') stringValue)+);
-                    comparsion = boolArg | numberValue (('>' | '<' | '>=' | '<=') numberValue)+;
+                    comparsion = boolArg | numberValue ('>' | '<' | '>=' | '<=') numberValue;
                         boolArg = ['!'] ('$' (boolFunction | boolField)) | boolBrackets |  bool;
                             boolFunction = contains | ?func1? | ?func2?;
                                 contains = 'contains' '(' stringArg ',' stringArg ')';

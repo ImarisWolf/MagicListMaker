@@ -607,6 +607,10 @@ namespace MagicParser.CodeParsing
                         string output = "";
                         Tokenizer T = new Tokenizer(t.input.Substring(t.pos));
                         //Для каждой карты будем дописывать одну строку в аутпут
+                        //Но если список карт вдруг пуст - проматываем токенайзер. Выполнить код придётся, потому что где-то внутри может быть одинарная кавычка внутри двойных, и получение текста до одинарной кавычки может закончиться ошибкой.
+                        bool dbIsEmpty = false;
+                        string emptyOutput = output;
+                        if (db.cardList.Count == 0) { dbIsEmpty = true; db.cardList.Add(new Entry()); }
                         foreach (Entry card in db.cardList)
                         {
                             //Для каждой карты создаём свой токенайзер
@@ -665,7 +669,7 @@ namespace MagicParser.CodeParsing
                                                             tempT.SetPos(0);
                                                             errorDescription = null;
                                                             bool boolResult = BoolFunction(tempT, card);
-                                                            if (errorDescription != null) { errorDescription = "Parsing failed. That may be because of wrong field name or wrong function return type."; return output; }
+                                                            if (errorDescription != null) { errorDescription = "Parsing failed. That may be because of wrong field name or wrong function return type. Check the synthax."; return output; }
                                                             else output += boolResult;
                                                         }
                                                         else output += numberResult;
@@ -683,8 +687,10 @@ namespace MagicParser.CodeParsing
                                 }
                                 else output += T.GetSymbol();
                             }
-                            //после того, как закончили парсить формулу - переводим строку, переходим к следующей карте, для которой заново будем парсить формулу
-                            output += "\r\n";
+                            //после того, как закончили парсить формулу - переводим строку, переходим к следующей карте, для которой заново будем парсить формулу.
+                            //Если база была пуста - ничего не добавляем. Мы просто промотали токенайзер.
+                            if (!dbIsEmpty) output += "\r\n";
+                            else output = emptyOutput;
                         }
                         t.SetPos(T.pos + t.input.Length - T.input.Length);
                         GetToken(t);
@@ -717,7 +723,7 @@ namespace MagicParser.CodeParsing
                     T.SetPos(0);
                     errorDescription = null;
                     string stringResult = StringValue(T, card);
-                    if (errorDescription != null) { errorDescription = "Parsing failed. Check the synthax."; return new Tuple<string, bool, string, float>("error", false, null, 0); }
+                    if (errorDescription != null) { errorDescription = "Parsing failed. That may be because of wrong field name or synthax."; return new Tuple<string, bool, string, float>("error", false, null, 0); }
                     else output = new Tuple<string, bool, string, float>("string", false, stringResult, 0);
                 }
                 else output = new Tuple<string, bool, string, float>("number", false, null, numberResult);
@@ -781,24 +787,31 @@ namespace MagicParser.CodeParsing
         {
             //создаём отдельный токенайзер
             Tokenizer T = new Tokenizer(t.input.Substring(t.pos));
-            bool output = Comparsion(T, card);
+            bool boolLeft = Comparsion(T, card);
+            bool output = boolLeft;
             //если парсинг как сущность boolValue НЕ выдаёт ошибку - ищем дальше связки ('=' | '!=') comparsion.
             if (errorDescription == null)
             {
+                bool firstBypass = true;
                 while (GetNextToken(T) == "=" || GetNextToken(T) == "!=")
                 {
                     GetToken(T);
-                    if (GetNextToken(T) == "=")
+                    if (token == "=")
                     {
                         bool boolRight = Comparsion(T, card);
-                        output = output == boolRight;
+                        if (firstBypass) output = boolLeft == boolRight;
+                        else output = output && boolLeft == boolRight;
+                        boolLeft = boolRight;
                     }
                     else
                     {
                         bool boolRight = Comparsion(T, card);
-                        output = output != boolRight;
+                        if (firstBypass) output = boolLeft != boolRight;
+                        else output = output && boolLeft != boolRight;
+                        boolLeft = boolRight;
                     }
                     if (errorDescription != null) return output;
+                    firstBypass = false;
                 }
             }
             //если парсинг как сущность comparsion выдаёт ошибку - пытаемся парсить как сущность numberValue
@@ -810,23 +823,27 @@ namespace MagicParser.CodeParsing
                 //если парсинг как сущность numberValue НЕ выдаёт ошибку - ищем дальше связки ('=' | '!=') numberValue. Должна быть хотя бы одна такая связка.
                 if (errorDescription == null)
                 {
+                    bool firstBypass = true;
                     do
                     {
                         GetToken(T);
                         if (token == "=")
                         {
                             float numberRight = NumberValue(T, card);
-                            output = numberLeft == numberRight;
+                            if (firstBypass) output = numberLeft == numberRight;
+                            else output = output && numberLeft == numberRight;
                             numberLeft = numberRight;
                         }
                         else if (token == "!=")
                         {
                             float numberRight = NumberValue(T, card);
-                            output = numberLeft != numberRight;
+                            if (firstBypass) output = numberLeft != numberRight;
+                            else output = output && numberLeft != numberRight;
                             numberLeft = numberRight;
                         }
                         else { errorDescription = ErrorExpected("'=' or '!='", false); return output; }
                         if (errorDescription != null) return output;
+                        firstBypass = false;
                     }
                     while (GetNextToken(T) == "=" || GetNextToken(T) == "!=");
                 }
@@ -839,27 +856,31 @@ namespace MagicParser.CodeParsing
                     //если парсинг как сущность stringValue НЕ выдаёт ошибку - ищем дальше связки ('=' | '!=') stringValue. Должна быть хотя бы одна такая связка.
                     if (errorDescription == null)
                     {
+                        bool firstBypass = true;
                         do
                         {
                             GetToken(T);
                             if (token == "=")
                             {
                                 string stringRight = StringValue(T, card);
-                                output = stringLeft.ToLower() == stringRight.ToLower();
+                                if (firstBypass) output = stringLeft.ToLower() == stringRight.ToLower();
+                                else output = output && stringLeft.ToLower() == stringRight.ToLower();
                                 stringLeft = stringRight;
                             }
                             else if (token == "!=")
                             {
                                 string stringRight = StringValue(T, card);
-                                output = stringLeft.ToLower() != stringRight.ToLower();
+                                if (firstBypass) output = stringLeft.ToLower() != stringRight.ToLower();
+                                else output = output && stringLeft.ToLower() != stringRight.ToLower();
                                 stringLeft = stringRight;
                             }
                             else { errorDescription = ErrorExpected("'=' or '!='", false); return output; }
                             if (errorDescription != null) return output;
+                            firstBypass = false;
                         }
                         while (GetNextToken(T) == "=" || GetNextToken(T) == "!=");
                     }
-                    else { errorDescription = "Parsing failed. Check the synthax."; return output; }
+                    else { errorDescription = "Parsing failed. Bool value expected. Check the synthax."; return output; }
                 }
             }
             t.SetPos(T.pos + t.input.Length - T.input.Length);
@@ -881,40 +902,36 @@ namespace MagicParser.CodeParsing
                 //если парсинг как сущность boolValue НЕ выдаёт ошибку - ищем дальше связки ('>' | '>=' | '<' | '<=') boolValue . Должна быть хотя бы одна такая связка.
                 if (errorDescription == null)
                 {
-                    do
+                    GetToken(T);
+
+                    if (token == ">")
                     {
-                        GetToken(T);
-                        
-                        if (token == ">")
-                        {
-                            float numberRight = NumberValue(T, card);
-                            output = numberLeft > numberRight;
-                            numberLeft = numberRight;
-                        }
-                        else if (token == ">=")
-                        {
-                            float numberRight = NumberValue(T, card);
-                            output = numberLeft >= numberRight;
-                            numberLeft = numberRight;
-                        }
-                        else if (token == "<")
-                        {
-                            float numberRight = NumberValue(T, card);
-                            output = numberLeft < numberRight;
-                            numberLeft = numberRight;
-                        }
-                        else if (token == "<=")
-                        {
-                            float numberRight = NumberValue(T, card);
-                            output = numberLeft <= numberRight;
-                            numberLeft = numberRight;
-                        }
-                        else { errorDescription = ErrorExpected("'>', '>=', '<', or '<='", false); return output; }
-                        if (errorDescription != null) return output;
+                        float numberRight = NumberValue(T, card);
+                        output = numberLeft > numberRight;
+                        numberLeft = numberRight;
                     }
-                    while (GetNextToken(T) == ">" || GetNextToken(T) == ">=" || GetNextToken(T) == "<" || GetNextToken(T) == "<=");
+                    else if (token == ">=")
+                    {
+                        float numberRight = NumberValue(T, card);
+                        output = numberLeft >= numberRight;
+                        numberLeft = numberRight;
+                    }
+                    else if (token == "<")
+                    {
+                        float numberRight = NumberValue(T, card);
+                        output = numberLeft < numberRight;
+                        numberLeft = numberRight;
+                    }
+                    else if (token == "<=")
+                    {
+                        float numberRight = NumberValue(T, card);
+                        output = numberLeft <= numberRight;
+                        numberLeft = numberRight;
+                    }
+                    else { errorDescription = ErrorExpected("'>', '>=', '<', or '<='", false); return output; }
+                    if (errorDescription != null) return output;
                 }
-                else { errorDescription = "Parsing failed. Check the synthax."; return output; }
+                else { errorDescription = "Parsing failed. Bool value expected. Check the synthax."; return output; }
             }
             //если парсинг как сущность boolArg НЕ выдаёт ошибку - возвращаем полученное значение
             t.SetPos(T.pos + t.input.Length - T.input.Length);
@@ -941,7 +958,7 @@ namespace MagicParser.CodeParsing
                     errorDescription = null;
                     bool boolResult = BoolFunction(T, card);
                     output = boolResult;
-                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function name.\r\nParsing as bool ended with an error:\r\n" + errorDescription; return reverseOutput != output; }
+                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function error.\r\nParsing as bool function ended with an error:\r\n" + errorDescription; return reverseOutput != output; }
                 }
                 t.SetPos(T.pos + t.input.Length - T.input.Length);
             }
@@ -976,13 +993,13 @@ namespace MagicParser.CodeParsing
                 GetToken(t);
                 if (token == "(")
                 {
-                    string firstArg = StringArg(t, card);
+                    string firstArg = StringValue(t, card);
                     if (errorDescription != null) return false;
                     GetToken(t);
                     if (token == ",")
                     {
                         bool output;
-                        string secondArg = StringArg(t, card);
+                        string secondArg = StringValue(t, card);
                         output = firstArg.ToLower().Contains(secondArg.ToLower());
                         if (errorDescription != null) return output;
 
@@ -1006,7 +1023,7 @@ namespace MagicParser.CodeParsing
                 bool output = BoolValue(t, card);
                 if (errorDescription != null) return output;
                 GetToken(t);
-                if (token == ")") errorDescription = ErrorExpected(")");
+                if (token != ")") errorDescription = ErrorExpected(")");
                 return output;
             }
             else { errorDescription = ErrorExpected("("); return false; }
@@ -1096,7 +1113,7 @@ namespace MagicParser.CodeParsing
                     errorDescription = null;
                     float numberResult = NumberFunction(T, card);
                     output = numberResult;
-                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function name.\r\nParsing as number ended with an error:\r\n" + errorDescription; return reverseOutput ? -output : output; }
+                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function error.\r\nParsing as number function ended with an error:\r\n" + errorDescription; return reverseOutput ? -output : output; }
                 }
                 t.SetPos(T.pos + t.input.Length - T.input.Length);
             }
@@ -1261,7 +1278,7 @@ namespace MagicParser.CodeParsing
                     errorDescription = null;
                     string stringResult = StringFunction(T, card);
                     output = stringResult;
-                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function name.\r\nParsing as string ended with an error:\r\n" + errorDescription; return output; }
+                    if (errorDescription != null) { errorDescription = "Parsing failed. Wrong field or function error.\r\nParsing as string function ended with an error:\r\n" + errorDescription; return output; }
                 }
                 t.SetPos(T.pos + t.input.Length - T.input.Length);
             }

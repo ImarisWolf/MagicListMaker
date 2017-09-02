@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = '88 + 12 = 10*10'
+sort = 'nameOracle'
+format = '$(14/2 - 7 = 1)'
+endlist

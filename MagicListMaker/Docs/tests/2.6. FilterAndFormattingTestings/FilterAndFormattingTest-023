@@ -1,0 +1,44 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = 'true'
+sort = 'nameOracle'
+
+format = 'Default fields:
+artist: "$artist"
+border: "$border"
+color: "$color"
+copyright: "$copyright"
+cost: "$cost"
+language: "$language"
+legality: "$legality"
+name: "$name"
+nameOracle: "$nameOracle"
+notes: "$notes"
+number: "$number"
+pt: "$pt"
+rarity: "$rarity"
+set: "$set"
+text: "$text"
+textOracle: "$textOracle"
+type: "$type"
+typeOracle: "$typeOracle"
+version: "$version"
+
+New fields:
+comment: "$comment"
+grade: "$grade"
+
+Useless fields:
+gradeF: "$gradeF"
+gradeR: "$gradeR"
+
+=========================
+
+
+.'
+endlist

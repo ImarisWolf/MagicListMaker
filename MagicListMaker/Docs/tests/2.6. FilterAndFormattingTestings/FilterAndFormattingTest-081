@@ -1,0 +1,11 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = '$tostring(42) != "43" != "4" + $if(!$foil, "3")'
+sort = 'nameOracle'
+format = '$("str" + "ing" != "string" = "string")'
+endlist

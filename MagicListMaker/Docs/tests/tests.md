@@ -146,67 +146,67 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 
 ### Filter and formatting testings
 **Check:**
-+ `true` and `false` values work correctly;
-+ negative for `true` and `false` values (`!`) works correctly;
-+ positive 'base' (digital) number values work correctly;
-+ negative base (digital) number values work correctly;
-+ base string values (in quotes) work correctly;
-+ brackets `(`, `)` with a basic bool   value work correctly;
-+ brackets `(`, `)` with a basic number value work correctly;
-+ brackets `(`, `)` with a basic string value work correctly;
-+ bool   fields work correctly;
-+ number fields work correctly;
-+ string fields work correctly;
-+ works correctly if some symbols in the field names are in wrong register;
++ `true` and `false` values work correctly; `001` - `003`
++ negative for `true` and `false` values (`!`) works correctly; `004` - `006`
++ positive 'base' (digital) number values work correctly; `007` - `009`
++ negative base (digital) number values work correctly; `010` `011`
++ base string values (in quotes) work correctly; `012` `019` `020`
++ brackets `(`, `)` with a basic bool   value work correctly; `013` `014` | `063`
++ brackets `(`, `)` with a basic number value work correctly; `015` `016` | `064`
++ brackets `(`, `)` with a basic string value work correctly; `017` `018` | `065`
++ bool   fields work correctly; `021`
++ number fields work correctly; `022`
++ string fields work correctly; `023`
++ works correctly if some symbols in the field names are in wrong register; `024`
 
-+ Comparsion   `>`  works correctly with two     basic number values;
-+ Comparsion   `>=` works correctly with two     basic number values;
-+ Comparsion   `<`  works correctly with two     basic number values;
-+ Comparsion   `<=` works correctly with two     basic number values;
-+ EQUALITY     `=`  works correctly with two     basic bool   values;
-+ EQUALITY     `=`  works correctly with several basic bool   values;
-+ EQUALITY     `=`  works correctly with two     basic number values;
-+ EQUALITY     `=`  works correctly with several basic number values;
-+ EQUALITY     `=`  works correctly with two     basic string values;
-+ EQUALITY     `=`  works correctly with several basic string values;
-+ NOT-EQUALITY `!=` works correctly with two     basic bool   values;
-+ NOT-EQUALITY `!=` works correctly with several basic bool   values;
-+ NOT-EQUALITY `!=` works correctly with two     basic number values;
-+ NOT-EQUALITY `!=` works correctly with several basic number values;
-+ NOT-EQUALITY `!=` works correctly with two     basic string values;
-+ NOT-EQUALITY `!=` works correctly with several basic string values;
-+ AND          `&`  works correctly with two     basic bool   values;
-+ AND          `&`  works correctly with several basic bool   values;
-+ OR           `|`  works correctly with two     basic bool   values;
-+ OR           `|`  works correctly with several basic bool   values;
++ Comparsion   `>`  works correctly with two     basic number values; `025` | `066`
++ Comparsion   `>=` works correctly with two     basic number values; `026` | `067`
++ Comparsion   `<`  works correctly with two     basic number values; `027` | `068`
++ Comparsion   `<=` works correctly with two     basic number values; `028` | `069`
++ EQUALITY     `=`  works correctly with two     basic bool   values; `029` | `070`
++ EQUALITY     `=`  works correctly with several basic bool   values; `030` | `071`
++ EQUALITY     `=`  works correctly with two     basic number values; `031` | `072`
++ EQUALITY     `=`  works correctly with several basic number values; `032` | `073`
++ EQUALITY     `=`  works correctly with two     basic string values; `033` | `074`
++ EQUALITY     `=`  works correctly with several basic string values; `034` | `075`
++ NOT-EQUALITY `!=` works correctly with two     basic bool   values; `035` | `076`
++ NOT-EQUALITY `!=` works correctly with several basic bool   values; `036` | `077`
++ NOT-EQUALITY `!=` works correctly with two     basic number values; `037` | `078`
++ NOT-EQUALITY `!=` works correctly with several basic number values; `038` | `079`
++ NOT-EQUALITY `!=` works correctly with two     basic string values; `039` | `080`
++ NOT-EQUALITY `!=` works correctly with several basic string values; `040` | `081`
++ AND          `&`  works correctly with two     basic bool   values; `041` | `082`
++ AND          `&`  works correctly with several basic bool   values; `042` | `083`
++ OR           `|`  works correctly with two     basic bool   values; `043` | `085`
++ OR           `|`  works correctly with several basic bool   values; `044` | `086`
 
-+ COMPOSITION  `*`  works correctly with two     basic number values;
-+ COMPOSITION  `*`  works correctly with several basic number values;
-+ DIVISION     `*`  works correctly with two     basic number values;
-+ DIVISION     `*`  works correctly with several basic number values;
-+ SUM          `+`  works correctly with two     basic number values;
-+ SUM          `+`  works correctly with several basic number values;
-+ DIFFERENCE   `-`  works correctly with two     basic number values;
-+ DIFFERENCE   `-`  works correctly with several basic number values;
++ COMPOSITION  `*`  works correctly with two     basic number values; `045` | `087`
++ COMPOSITION  `*`  works correctly with several basic number values; `046` | `087`
++ DIVISION     `/`  works correctly with two     basic number values; `047` | `087`
++ DIVISION     `/`  works correctly with several basic number values; `048` | `087`
++ SUM          `+`  works correctly with two     basic number values; `049` | `087`
++ SUM          `+`  works correctly with several basic number values; `050` | `087`
++ DIFFERENCE   `-`  works correctly with two     basic number values; `051` | `087`
++ DIFFERENCE   `-`  works correctly with several basic number values; `052` | `087`
 
-+ JOIN         `+`  works correctly with two     basic string values;
-+ JOIN         `+`  works correctly with several basic string values;
++ JOIN         `+`  works correctly with two     basic string values; `053` | `088`
++ JOIN         `+`  works correctly with several basic string values; `054` | `088`
 
-+ function CONTAINS works correctly with two   basic arguments values;
-+ function IF       works correctly with two   basic argument for numbers;
-+ function IF       works correctly with three basic arguments for numbers;
-+ function IF       works correctly with two   basic argument  for strings;
-+ function IF       works correctly with three basic arguments for strings;
-+ function TOSTRING works correctly with any   basic argument;
++ function CONTAINS works correctly with two   basic arguments values; `055` | `089`
++ function IF       works correctly with two   basic argument for numbers; `056` | `090`
++ function IF       works correctly with three basic arguments for numbers; `057` | `091`
++ function IF       works correctly with two   basic argument  for strings; `058` | `092`
++ function IF       works correctly with three basic arguments for strings; `059` | `093`
++ function TOSTRING works correctly with any   basic argument; `060` | `094`
 
-+ negative for any bool   values (`!`) works correctly;
-+ negation for any number values (`-`) works correctly;
++ negative for any bool   values (`!`) works correctly; `061` | `095`
++ negation for any number values (`-`) works correctly; `045` - `052` `062`
 
-+ ALL of the things above work correctly with non-basic values - other operators and functions
-+ order of operations works correctly;
++ ALL of the things above work correctly with non-basic values - other operators and functions `063` - `095`
++ order of operations works correctly; `087` `096`
 
-+ EMPTYFUNCTION works correctly with any argument;
-+ format works correctly;
++ EMPTYFUNCTION works correctly with any argument; `almost all the tests`
++ format works correctly; `all the tests`
 
 ## III. Other testings
 **Check:**

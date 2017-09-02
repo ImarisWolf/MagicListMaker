@@ -1,0 +1,65 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = 'true'
+sort = 'nameOracle'
+
+format = 'Default fields:
+artist: "$aRtist"
+border: "$boRder"
+buyQty: "$buyqty"
+color: "$COLOR"
+copyright: "$cOpYrIgHt"
+cost: "$cOST"
+language: "$LanguagE"
+legality: "$lEGALITy"
+name: "$NaME"
+nameOracle: "$NAMEoracle"
+notes: "$notEs"
+number: "$Number"
+pt: "$PT"
+priceF: "$pricef"
+priceR: "$pricer"
+proxies: "$pROxies"
+rarity: "$rarIty"
+rating: "$ratiNg"
+sellQty: "$selLQty"
+set: "$sEt"
+text: "$Text"
+textOracle: "$textORACLE"
+type: "$tyPe"
+typeOracle: "$TypeOracle"
+used: "$USed"
+version: "$Version"
+
+New fields:
+qty: "$qTy"
+foil: "$fOil"
+dollarRate: "$dolLarRate"
+discount: "$disCOUNT"
+comment: "$cOmMeNt"
+grade: "$graDe"
+originalPrice: "$oriGinalPriCe"
+price: "$PRice"
+priority: "$priorIty"
+
+Service fields:
+groupID: "$Groupid"
+
+Useless fields:
+buyPrice: "$buyprice"
+sellPrice: "$sellprice"
+gradeF: "$gradef"
+gradeR: "$grader"
+qtyF: "$qtyf"
+qtyR: "$qtyr"
+
+=========================
+
+
+.'
+endlist

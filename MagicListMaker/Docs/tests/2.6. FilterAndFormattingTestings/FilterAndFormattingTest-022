@@ -1,0 +1,43 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\filter-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+parseNotes = true
+filter = 'true'
+sort = 'nameOracle'
+
+format = 'Default fields:
+buyQty: "$buyQty"
+priceF: "$priceF"
+priceR: "$priceR"
+proxies: "$proxies"
+rarity: "$rarity"
+rating: "$rating"
+sellQty: "$sellQty"
+used: "$used"
+
+New fields:
+qty: "$qty"
+dollarRate: "$dollarRate"
+discount: "$discount"
+originalPrice: "$originalPrice"
+price: "$price"
+priority: "$priority"
+
+Service fields:
+groupID: "$groupID"
+
+Useless fields:
+buyPrice: "$buyPrice"
+sellPrice: "$sellPrice"
+qtyF: "$qtyF"
+qtyR: "$qtyR"
+
+=========================
+
+
+.'
+
+endlist
