@@ -97,7 +97,7 @@ Now you look and see that two cards with one name are separated by several lines
 + Forced Fruition - SP - $8.00
 + Cloudstone Curio - NM - $9.50
 + Nissa, Steward of Elements - NM - $9.00
-With just sorting you can't do it. Sorting by nameat first priorty will crush you sorting by price:
+With just sorting you can't do it. Sorting by name at first priorty will crush you sorting by price:
 + Cloudstone Curio - NM - $9.50
 + Forced Fruition - NM - $10.00
 + Forced Fruition - SP - $8.00

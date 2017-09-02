@@ -1,0 +1,14 @@
+dbs
+testDB = 'C:\Users\Imaris\Documents\Visual Studio 2017\Projects\MagicListMaker\MagicListMaker\Docs\tests\exports\sort-01.txt'
+enddbs
+
+list
+dbs = 'testDB'
+smartRound = false
+defaultNMSPDiscount = 0
+defaultSPDiscount = 0
+defaultMPDiscount = 0
+parseNotes = true
+sort = '!price nameOracle'
+format = '$qty $nameOracle $language $grade - $price р.'
+endlist
