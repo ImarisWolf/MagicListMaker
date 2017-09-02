@@ -51,7 +51,7 @@
             this.editToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(784, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1350, 24);
             this.menuStrip.TabIndex = 3;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -125,23 +125,22 @@
             this.InputTextBox.AcceptsTab = true;
             this.InputTextBox.DetectUrls = false;
             this.InputTextBox.Font = new System.Drawing.Font("Courier New", 10F);
-            this.InputTextBox.Location = new System.Drawing.Point(12, 27);
+            this.InputTextBox.Location = new System.Drawing.Point(0, 27);
             this.InputTextBox.Name = "InputTextBox";
-            this.InputTextBox.Size = new System.Drawing.Size(380, 472);
+            this.InputTextBox.Size = new System.Drawing.Size(672, 588);
             this.InputTextBox.TabIndex = 1;
             this.InputTextBox.Text = "";
             this.InputTextBox.TextChanged += new System.EventHandler(this.InputTextBox_TextChanged);
-            this.InputTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputTextBox_KeyDown);
             // 
             // OutputTextBox
             // 
             this.OutputTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.OutputTextBox.DetectUrls = false;
-            this.OutputTextBox.Font = new System.Drawing.Font("Courier New", 10F);
-            this.OutputTextBox.Location = new System.Drawing.Point(392, 27);
+            this.OutputTextBox.Font = new System.Drawing.Font("Arial Unicode MS", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.OutputTextBox.Location = new System.Drawing.Point(678, 27);
             this.OutputTextBox.Name = "OutputTextBox";
             this.OutputTextBox.ReadOnly = true;
-            this.OutputTextBox.Size = new System.Drawing.Size(380, 472);
+            this.OutputTextBox.Size = new System.Drawing.Size(672, 588);
             this.OutputTextBox.TabIndex = 2;
             this.OutputTextBox.Text = "";
             // 
@@ -153,10 +152,10 @@
             this.ErrorLogTextBox.DetectUrls = false;
             this.ErrorLogTextBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.ErrorLogTextBox.ForeColor = System.Drawing.Color.Red;
-            this.ErrorLogTextBox.Location = new System.Drawing.Point(12, 505);
+            this.ErrorLogTextBox.Location = new System.Drawing.Point(0, 621);
             this.ErrorLogTextBox.Name = "ErrorLogTextBox";
             this.ErrorLogTextBox.ReadOnly = true;
-            this.ErrorLogTextBox.Size = new System.Drawing.Size(760, 50);
+            this.ErrorLogTextBox.Size = new System.Drawing.Size(1350, 100);
             this.ErrorLogTextBox.TabIndex = 3;
             this.ErrorLogTextBox.TabStop = false;
             this.ErrorLogTextBox.Text = "";
@@ -167,7 +166,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 562);
+            this.ClientSize = new System.Drawing.Size(1350, 730);
             this.Controls.Add(this.ErrorLogTextBox);
             this.Controls.Add(this.OutputTextBox);
             this.Controls.Add(this.InputTextBox);

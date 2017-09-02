@@ -151,7 +151,7 @@ namespace MagicParser.CodeParsing
             }
 
             tokenizerLastErrorPos = 0;
-            return output;
+            return output.TrimStart().TrimEnd();
         }
 
         //declaration*
