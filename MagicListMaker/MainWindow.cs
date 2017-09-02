@@ -79,6 +79,7 @@ namespace MagicParser
             {
                 fileName = saveFileDialog.FileName;
                 Write();
+                originInput = InputTextBox.Text;
             }
         }
         
@@ -113,6 +114,7 @@ namespace MagicParser
             {
                 fileName = "";
                 InputTextBox.Text = "";
+                originInput = "";
             }
         }
 
