@@ -137,12 +137,12 @@ Throughout the whole test the error messages must be tracked. They must be SHORT
 
 ### Sorting and grouping testings
 **Check:**
-+ works correctly with one sort field;
-+ works correctly with one several sort fields;
-+ reverse sorting works correctly;
-+ works correctly with one group with one field;
-+ works correctly with one group with several field;
-+ works correctly with several groups;
++ works correctly with one sort field; `01`
++ works correctly with one several sort fields; `02`
++ reverse sorting works correctly; `03`
++ works correctly with one group with one field; `04`
++ works correctly with one group with several field; `05`
++ works correctly with several groups; `06`
 
 ### Filter and formatting testings
 **Check:**
