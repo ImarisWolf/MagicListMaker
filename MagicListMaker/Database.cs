@@ -82,6 +82,11 @@ namespace MagicParser
             public float originalPrice;
             public float price;
             public int priority; //manual priority
+
+            public bool standardLegality;
+            public bool modernLegality;
+            public bool legacyLegality;
+            public bool vintageLegality;
             //public float cmc;
             //public float power;
             //public float toughness;
@@ -137,8 +142,13 @@ namespace MagicParser
                 originalPrice = 0;
                 price = 0;
                 priority = 0;
+
+                standardLegality = false;
+                modernLegality = false;
+                legacyLegality = false;
+                vintageLegality = false;
         }
-        public Entry(Entry entry)
+            public Entry(Entry entry)
             {
                 FieldInfo[] fields = typeof(Entry).GetFields();
                 foreach (FieldInfo field in fields)
@@ -1045,10 +1055,18 @@ namespace MagicParser
 
                 //Обработка для багованной японской карты
                 if (entry.type == "トークン・クリーチャー ― ヘリオン  トークン・クリーチャー ― ヘリオン") entry.type = "トークン・クリーチャー ― ヘリオン";
+
+                //Легальность в турнирах
+                if (entry.legality.Length == 4)
+                {
+                    if (entry.legality[0] == 'L' || entry.legality[0] == 'R') entry.standardLegality = true;
+                    if (entry.legality[1] == 'L' || entry.legality[1] == 'R') entry.modernLegality = true;
+                    if (entry.legality[2] == 'L' || entry.legality[2] == 'R') entry.legacyLegality = true;
+                    if (entry.legality[3] == 'L' || entry.legality[3] == 'R') entry.vintageLegality = true;
+                }
                 //color
                 //color identity
                 //cost
-                //legality
                 //pt
                 //set dates
                 //sub types

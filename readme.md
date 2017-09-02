@@ -187,7 +187,7 @@ You can also set multi-option parameter. For example: `2 non-foil SP Korean`, or
 + Error codes are not always clear;
 + There is no synthax highlight (I've made one, it works, but it it is full of bugs unrelated to highlight itself, so I turned it off);
 + There are no DB totals, like sum of prices;
-+ For some fields there are no special handlings for easier getting values (color, color identity, cost, legality, power/toughness set dates, set full names, card type separations)
++ For some fields there are no special handlings for easier getting values (color, color identity, cost, power/toughness set dates, set full names, card type separations)
 + Grades are sorted alphabetically;
 + You can use fields that weren't loaded from MA;
 + There is no escape character;

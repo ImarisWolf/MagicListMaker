@@ -1038,6 +1038,14 @@ namespace MagicParser.CodeParsing
             {
                 case "foil":
                     output = card.foil; break;
+                case "standardlegality":
+                    output = card.standardLegality; break;
+                case "modernlegality":
+                    output = card.modernLegality; break;
+                case "legacylegality":
+                    output = card.legacyLegality; break;
+                case "vintagelegality":
+                    output = card.vintageLegality; break;
                 default:
                     errorDescription = "Wrong value name: " + token; output = false; break;
             }
