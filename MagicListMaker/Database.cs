@@ -31,6 +31,7 @@ namespace MagicParser
         public float round;
         public float minimumPrice;
         public bool handleMultiNames;
+        public bool noNMGrade;
         public static string token; //Текущий токен при парсинге с токенайзером
         public string errorDescription;
 
@@ -304,6 +305,8 @@ namespace MagicParser
                 //Делаем всё остальное, что необходимо сделать с позициями
                 ResidualParsing();
                 if (errorDescription != null) return;
+
+                Mergedentical();
             }
             catch
             {
@@ -941,6 +944,7 @@ namespace MagicParser
                 else if (entry.grade.ToLower() == "fr") entry.grade = "HP";
                 else if (entry.grade.ToLower() == "poor") entry.grade = "HP";
 
+                if (noNMGrade && entry.grade.ToLower() == "nm") entry.grade = "NM/M";
                 //price handling
                 //inherit dollar rate and discount
                 if (entry.dollarRate == 0) entry.dollarRate = defaultDollarRate;
@@ -1064,6 +1068,8 @@ namespace MagicParser
                     if (entry.legality[2] == 'L' || entry.legality[2] == 'R') entry.legacyLegality = true;
                     if (entry.legality[3] == 'L' || entry.legality[3] == 'R') entry.vintageLegality = true;
                 }
+
+                
                 //color
                 //color identity
                 //cost
@@ -1074,7 +1080,68 @@ namespace MagicParser
                 //general types?
             }
         }
-        
+
+        //Ищет карты  абсолютно одинаковыми полями (исключая qty) и сливает их в одну карту
+        private void Mergedentical()
+        {
+            /* пройтись по всем картам в базе
+             * в этом цикле - пройтись по всем следующим картам (цикл не прерывается)
+             * если текущая карта не меченая, и карты идентичны - сливаем в одну и метим вторую карту
+             */
+
+            List<Entry> newList = new List<Entry>();
+            bool[] tagged = new bool[cardList.Count];
+            for (int i = 0; i < tagged.Count(); i++) tagged[i] = false;
+            for (int i = 0; i < cardList.Count; i++)
+            {
+                for (int j = i+1; j < cardList.Count; j++)
+                {
+                    if (!tagged[i])
+                    {
+                        FieldInfo[] fields = typeof(Entry).GetFields();
+                        bool differentFields = false;
+                        foreach (FieldInfo field in fields)
+                        {
+                            if (field.GetValue(cardList[i]).GetType() == typeof(bool))
+                            {
+                                bool e = (bool)field.GetValue(cardList[i]);
+                                bool c = (bool)field.GetValue(cardList[j]);
+                                if (e != c) { differentFields = true; break; }
+                            }
+                            else if (field.GetValue(cardList[i]).GetType() == typeof(int) && field.Name != "qty")
+                            {
+                                int e = (int)field.GetValue(cardList[i]);
+                                int c = (int)field.GetValue(cardList[j]);
+                                if (e != c) { differentFields = true; break; }
+                            }
+                            else if (field.GetValue(cardList[i]).GetType() == typeof(float))
+                            {
+                                float e = (float)field.GetValue(cardList[i]);
+                                float c = (float)field.GetValue(cardList[j]);
+                                if (e != c) { differentFields = true; break; }
+                            }
+                            else if (field.GetValue(cardList[i]).GetType() == typeof(string))
+                            {
+                                string e = (string)field.GetValue(cardList[i]);
+                                string c = (string)field.GetValue(cardList[j]);
+                                if (e != c) { differentFields = true; break; }
+                            }
+
+                        }
+                        //если такая же карта уже есть - надо прибавить количество и пометить ту карту как использованную
+                        if (!differentFields)
+                        {
+                            cardList[i].qty += cardList[j].qty;
+                            tagged[j] = true;
+                        }
+                    }
+                }
+                if (!tagged[i]) newList.Add(cardList[i]);
+            }
+
+            cardList = newList;
+        }
+
         #endregion
 
         public static Database Merge(List<Database> dbs)

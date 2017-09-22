@@ -57,6 +57,7 @@ namespace MagicParser.CodeParsing
             tokens.Add(new Token(Token.roundToken,                  true, "number", typeof(Database).GetField("round")));
             tokens.Add(new Token(Token.minimumPriceToken,           true, "number", typeof(Database).GetField("minimumPrice")));
             tokens.Add(new Token(Token.handleMultiNamesToken,       true, "bool",   typeof(Database).GetField("handleMultiNames")));
+            tokens.Add(new Token(Token.noNMGradeToken,              true, "bool",   typeof(Database).GetField("noNMGrade")));
 
             tokens.Add(new Token(Token.filterToken));
             tokens.Add(new Token(Token.groupingToken));
