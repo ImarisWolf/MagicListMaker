@@ -178,7 +178,6 @@ namespace MagicParser
             public float nonFoilPrice;
             public string foilGrade;
             public string nonFoilGrade;
-            //public bool bothFoilAndNonFoil;
 
             public Parameter(Entry entry)
             {
@@ -199,7 +198,6 @@ namespace MagicParser
                 nonFoilPrice = entry.sellPrice;
                 foilGrade = entry.gradeF;
                 nonFoilGrade = entry.gradeR;
-                //bothFoilAndNonFoil = false;
             }
         }
         
@@ -306,7 +304,7 @@ namespace MagicParser
                 ResidualParsing();
                 if (errorDescription != null) return;
 
-                Mergedentical();
+                //Mergedentical();
             }
             catch
             {
@@ -709,6 +707,13 @@ namespace MagicParser
                 }
                 while (token != "");
 
+                //костыыыыль
+                if (par.grade.IndexOf("NM /") == -1 && par.grade.IndexOf("NM") == 0 && par.comment == "" && par.discount == 0 && par.dollarRate == 0 && par.fields.Count == 0 && par.fieldValues.Count == 0 && par.language == entry.language && par.price == 0 && par.priority == 0 && par.foilPrice == entry.buyPrice && par.nonFoilPrice == entry.sellPrice && par.foilGrade == entry.gradeF && par.nonFoilGrade == entry.gradeR)
+                {
+                    continue;
+                }
+                
+
                 //Корректируем цены и состояния на фойло
                 if (par.type == "foil")
                 {
@@ -943,6 +948,9 @@ namespace MagicParser
                 else if (entry.grade.ToLower() == "good") entry.grade = "MP/HP";
                 else if (entry.grade.ToLower() == "fr") entry.grade = "HP";
                 else if (entry.grade.ToLower() == "poor") entry.grade = "HP";
+
+                //костыль
+                entry.grade = entry.grade.Replace("NM / M", "NM/M").Replace("NM / SP", "NM/SP").Replace("SP / MP", "SP/MP").Replace("MP / HP", "MP/HP");
 
                 if (noNMGrade && entry.grade.ToLower() == "nm") entry.grade = "NM/M";
                 //price handling
